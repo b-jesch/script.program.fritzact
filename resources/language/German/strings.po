@@ -138,5 +138,5 @@ msgid "switch off"
 msgstr "ausschalten"
 
 msgctxt "#30041"
-msgid "einschalten"
-msgstr ""
+msgid "switch on"
+msgstr "einschalten"
