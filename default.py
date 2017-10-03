@@ -456,6 +456,7 @@ if _addonHandle is None:
         fritz.switch(cmd, ain=ain, param=param, label=name)
         t.writeLog('Last command on device %s was: %s' % (ain, cmd), xbmc.LOGDEBUG)
         ts = int(time())
-        if ts - int(xbmcgui.Window(10000).getProperty('fritzact.timestamp')) > 5:
+        tsp = int(xbmcgui.Window(10000).getProperty('fritzact.timestamp') or '0')
+        if ts - tsp > 5:
             t.writeLog('Set timestamp: %s' % (str(ts)), xbmc.LOGDEBUG)
             xbmcgui.Window(10000).setProperty('fritzact.timestamp', str(ts))
