@@ -17,7 +17,7 @@
                                 <include>VisibleFadeEffect</include>
                         </control>
                         <control type="group">
-                                <visible>Container(9000).Hasfocus(1) + System.HasAddon(plugin.program.fritzact)</visible>
+                                <visible>Container(9000).Hasfocus(1) + System.HasAddon(script.program.fritzact)</visible>
                                 <include>VisibleFadeEffect</include>
                                 <control type="list" id="4151">
                                         <left>0</left>
@@ -85,7 +85,7 @@
                                                         <selectedcolor>selected</selectedcolor>
                                                         <align>right</align>
                                                         <aligny>top</aligny>
-                                                        <label>$ADDON[plugin.program.fritzact 30022] $INFO[ListItem.Property(present)]</label>
+                                                        <label>$ADDON[script.program.fritzact 30022] $INFO[ListItem.Property(present)]</label>
                                                 </control>
                                                 <control type="label">
                                                         <description>Actor Mode</description>
@@ -99,7 +99,7 @@
                                                         <selectedcolor>selected</selectedcolor>
                                                         <align>right</align>
                                                         <aligny>top</aligny>
-                                                        <label>$ADDON[plugin.program.fritzact 30026] $INFO[ListItem.Property(mode)]</label>
+                                                        <label>$ADDON[script.program.fritzact 30026] $INFO[ListItem.Property(mode)]</label>
                                                 </control>
                                                 <control type="label">
                                                         <description>Actor Toggle State</description>
@@ -113,7 +113,7 @@
                                                         <selectedcolor>selected</selectedcolor>
                                                         <align>right</align>
                                                         <aligny>top</aligny>
-                                                        <label>$ADDON[plugin.program.fritzact 30023] $INFO[ListItem.Property(state)]</label>
+                                                        <label>$ADDON[script.program.fritzact 30023] $INFO[ListItem.Property(state)]</label>
                                                 </control>
                                                 <control type="group">
                                                         <visible>String.IsEqual(ListItem.Property(type),switch)</visible>
@@ -129,7 +129,7 @@
                                                                 <selectedcolor>selected</selectedcolor>
                                                                 <align>right</align>
                                                                 <aligny>top</aligny>
-                                                                <label>$ADDON[plugin.program.fritzact 30024] $INFO[ListItem.Property(temperature)]</label>
+                                                                <label>$ADDON[script.program.fritzact 30024] $INFO[ListItem.Property(temperature)]</label>
                                                         </control>
                                                         <control type="label">
                                                                 <description>Actor Power Consumption</description>
@@ -143,7 +143,7 @@
                                                                 <selectedcolor>selected</selectedcolor>
                                                                 <align>right</align>
                                                                 <aligny>top</aligny>
-                                                                <label>$ADDON[plugin.program.fritzact 30027] $INFO[ListItem.Property(energy)]</label>
+                                                                <label>$ADDON[script.program.fritzact 30027] $INFO[ListItem.Property(energy)]</label>
                                                         </control>
                                                 </control>
                                                 <control type="group">
@@ -160,7 +160,7 @@
                                                                 <selectedcolor>selected</selectedcolor>
                                                                 <align>right</align>
                                                                 <aligny>top</aligny>
-                                                                <label>$ADDON[plugin.program.fritzact 30024] $INFO[ListItem.Property(temperature)]</label>
+                                                                <label>$ADDON[script.program.fritzact 30024] $INFO[ListItem.Property(temperature)]</label>
                                                         </control>
                                                         <control type="label">
                                                                 <description>Thermostat Temperature set</description>
@@ -174,7 +174,7 @@
                                                                 <selectedcolor>selected</selectedcolor>
                                                                 <align>right</align>
                                                                 <aligny>top</aligny>
-                                                                <label>$ADDON[plugin.program.fritzact 30029] $INFO[ListItem.Property(set_temp)]</label>
+                                                                <label>$ADDON[script.program.fritzact 30029] $INFO[ListItem.Property(set_temp)]</label>
                                                         </control>
                                                 </control>
                                                 <control type="label">
@@ -260,7 +260,7 @@
                                                         <selectedcolor>selected</selectedcolor>
                                                         <align>right</align>
                                                         <aligny>top</aligny>
-                                                        <label>$ADDON[plugin.program.fritzact 30022] $INFO[ListItem.Property(present)]</label>
+                                                        <label>$ADDON[script.program.fritzact 30022] $INFO[ListItem.Property(present)]</label>
                                                 </control>
                                                 <control type="label">
                                                         <description>Actor Mode</description>
@@ -274,7 +274,7 @@
                                                         <selectedcolor>selected</selectedcolor>
                                                         <align>right</align>
                                                         <aligny>top</aligny>
-                                                        <label>$ADDON[plugin.program.fritzact 30026] $INFO[ListItem.Property(mode)]</label>
+                                                        <label>$ADDON[script.program.fritzact 30026] $INFO[ListItem.Property(mode)]</label>
                                                 </control>
                                                 <control type="label">
                                                         <description>Actor Toggle State</description>
@@ -288,7 +288,7 @@
                                                         <selectedcolor>selected</selectedcolor>
                                                         <align>right</align>
                                                         <aligny>top</aligny>
-                                                        <label>$ADDON[plugin.program.fritzact 30023] $INFO[ListItem.Property(state)]</label>
+                                                        <label>$ADDON[script.program.fritzact 30023] $INFO[ListItem.Property(state)]</label>
                                                 </control>
                                                 <control type="group">
                                                         <visible>String.IsEqual(ListItem.Property(type),switch)</visible>
@@ -304,7 +304,7 @@
                                                                 <selectedcolor>selected</selectedcolor>
                                                                 <align>right</align>
                                                                 <aligny>top</aligny>
-                                                                <label>$ADDON[plugin.program.fritzact 30024] $INFO[ListItem.Property(temperature)]</label>
+                                                                <label>$ADDON[script.program.fritzact 30024] $INFO[ListItem.Property(temperature)]</label>
                                                         </control>
                                                         <control type="label">
                                                                 <description>Actor Power Consumption</description>
@@ -318,7 +318,7 @@
                                                                 <selectedcolor>selected</selectedcolor>
                                                                 <align>right</align>
                                                                 <aligny>top</aligny>
-                                                                <label>$ADDON[plugin.program.fritzact 30027] $INFO[ListItem.Property(energy)]</label>
+                                                                <label>$ADDON[script.program.fritzact 30027] $INFO[ListItem.Property(energy)]</label>
                                                         </control>
                                                 </control>
                                                 <control type="group">
@@ -335,7 +335,7 @@
                                                                 <selectedcolor>selected</selectedcolor>
                                                                 <align>right</align>
                                                                 <aligny>top</aligny>
-                                                                <label>$ADDON[plugin.program.fritzact 30024] $INFO[ListItem.Property(temperature)]</label>
+                                                                <label>$ADDON[script.program.fritzact 30024] $INFO[ListItem.Property(temperature)]</label>
                                                         </control>
                                                         <control type="label">
                                                                 <description>Thermostat Temperature set</description>
@@ -349,7 +349,7 @@
                                                                 <selectedcolor>selected</selectedcolor>
                                                                 <align>right</align>
                                                                 <aligny>top</aligny>
-                                                                <label>$ADDON[plugin.program.fritzact 30029] $INFO[ListItem.Property(set_temp)]</label>
+                                                                <label>$ADDON[script.program.fritzact 30029] $INFO[ListItem.Property(set_temp)]</label>
                                                         </control>
                                                 </control>
                                                 <control type="label">
@@ -367,10 +367,10 @@
                                                         <label>$INFO[ListItem.Label2]</label>
                                                 </control>
                                         </focusedlayout>
-                                        <onclick condition="String.IsEqual(Container(4151).ListItem.Property(type),switch)">RunScript(plugin.program.fritzact,action=toggle&amp;ain=$INFO[ListItem.Label2])</onclick>
-                                        <onclick condition="String.IsEqual(Container(4151).ListItem.Property(type),group)">RunScript(plugin.program.fritzact,action=toggle&amp;ain=$INFO[ListItem.Label2])</onclick>
-                                        <onclick condition="String.IsEqual(Container(4151).ListItem.Property(type),thermostat)">RunScript(plugin.program.fritzact,action=temp&amp;ain=$INFO[ListItem.Label2])</onclick>
-                                        <content target="programs">plugin://plugin.program.fritzact?ts=$INFO[Window(Home).Property(fritzact.timestamp)]</content>
+                                        <onclick condition="String.IsEqual(Container(4151).ListItem.Property(type),switch)">RunScript(script.program.fritzact,action=toggle&amp;ain=$INFO[ListItem.Label2])</onclick>
+                                        <onclick condition="String.IsEqual(Container(4151).ListItem.Property(type),group)">RunScript(script.program.fritzact,action=toggle&amp;ain=$INFO[ListItem.Label2])</onclick>
+                                        <onclick condition="String.IsEqual(Container(4151).ListItem.Property(type),thermostat)">RunScript(script.program.fritzact,action=temp&amp;ain=$INFO[ListItem.Label2])</onclick>
+                                        <content target="programs">plugin://script.program.fritzact?ts=$INFO[Window(Home).Property(fritzact.timestamp)]</content>
                                 </control>
                                 <control type="button">
                                         <description>right Arrow</description>

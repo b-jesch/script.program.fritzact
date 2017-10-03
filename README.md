@@ -3,7 +3,7 @@
 
 Die FritzBox bietet über die sogenannte AHA-HTTP-API, die Möglichkeit, DECT Steckdosen und Heizungsthermostaten (Comet) fernzuschalten. Dieses Addon nutzt diese Möglichkeit und stellt u.a. den Schaltzustand der Steckdosen und Thermostate in Kodi dar.
 
-Das Addon ist als Widget konzipiert, welches im Home unter dem Punkt Programme abgelegt wird. Damit steht es unmittelbar nach dem Start von Kodi zur Verfügung und die Steckdosen sind mit wenigen Aktionen der Fernbedienung erreichbar.
+Das Addon ist als Widget konzipiert, welches im Home unter dem Punkt Programme abgelegt wird. Damit steht es unmittelbar nach dem Start von Kodi zur Verfügung und die Steckdosen sind mit wenigen Aktionen der Fernbedienung erreichbar. Allerdings erfordert die Einbindung als Widget die Integration in den Skin (s.u.)
 
 Dazu muss es allerdings zunächst in den Einstellungen konfiguriert werden. AVM verlangt ab OS > 6.50 eine full qualified Authentication (Nutzer, Passwort). Es empfiehlt sich, für Smart Home einen eigenen Nutzer anzulegen und hier zu verwenden (Sniffing).
 

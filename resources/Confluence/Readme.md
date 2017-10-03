@@ -14,12 +14,12 @@ cd /usr/share/kodi/addons/skin.confluence/720p
 ```
 bis Kodi Jarvis (V16.x):
 ```
-sudo cp $HOME/.kodi/addons/plugin.program.fritzact/resources/Confluence/script-fritzact.v16.xml script-fritzact.xml
+sudo cp $HOME/.kodi/addons/script.program.fritzact/resources/Confluence/script-fritzact.v16.xml script-fritzact.xml
 ```
 Ab Kodi Krypton wird als Standardskin Estuary/Estouchy verwendet. Confluence muss aus einem Repository installiert werden, die Dateien liegen daher im Addon-Verzeichnis der Installation:
 ```
 cd $HOME/.kodi/addons/skin.confluence/720p
-cp $HOME/.kodi/addons/plugin.program.fritzact/resources/Confluence/script-fritzact.v17.xml script-fritzact.xml
+cp $HOME/.kodi/addons/script.program.fritzact/resources/Confluence/script-fritzact.v17.xml script-fritzact.xml
 ```
 
 * Einbinden der XML-Datei als Include in den Home-Bereich (Jarvis)
