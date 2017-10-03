@@ -25,7 +25,6 @@ msgctxt "Addon Description"
 msgid "Use your Fritz!DECT switches within Kodi. Control light and switch your devices with FritzDECT actors. Find out about powered-on devices and their power consumption. Make yourself comfortable with a touch of your remote."
 msgstr ""
 
-
 msgctxt "#30000"
 msgid "Fritzbox Name or IP"
 msgstr ""
