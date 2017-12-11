@@ -1,5 +1,4 @@
 <h1> Fritz!Box SmartHome - Switching Your FritzDECT </h1>
-
 The popular german ADSL device 'Fritz!Box' offers via AHA HTTP API, the possibility to control DECT power switches and heating thermostats (Comet) on remote. This addon takes advantage of this and makes it the switching state of the sockets and thermostats in Kodi.
 
 All devices can be controlled via a selection list. If only one device is available or if other devices are disabled for switching, this will switched directly. Same on if a preferred device is specified in the setup.
