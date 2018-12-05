@@ -29,18 +29,19 @@ __addon__ = xbmcaddon.Addon()
 __addonID__ = __addon__.getAddonInfo('id')
 __addonname__ = __addon__.getAddonInfo('name')
 __version__ = __addon__.getAddonInfo('version')
-__path__ = xbmc.translatePath(__addon__.getAddonInfo('path'))
+__images__ = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')), 'resources', 'lib', 'media')
 __LS__ = __addon__.getLocalizedString
 
-__s_on__ = os.path.join(__path__, 'resources', 'lib', 'media', 'dect_on.png')
-__s_off__ = os.path.join(__path__, 'resources', 'lib', 'media', 'dect_off.png')
-__s_absent__ = os.path.join(__path__, 'resources', 'lib', 'media', 'dect_absent.png')
-__t_on__ = os.path.join(__path__, 'resources', 'lib', 'media', 'comet_on.png')
-__t_absent__ = os.path.join(__path__, 'resources', 'lib', 'media', 'comet_absent.png')
-__gs_on__ = os.path.join(__path__, 'resources', 'lib', 'media', 'dect_group_on.png')
-__gs_off__ = os.path.join(__path__, 'resources', 'lib', 'media', 'dect_group_off.png')
-__gt_on__ = os.path.join(__path__, 'resources', 'lib', 'media', 'comet_group_on.png')
-__gt_absent__ = os.path.join(__path__, 'resources', 'lib', 'media', 'comet_group_absent.png')
+__s_on__ = os.path.join(__images__, 'dect_on.png')
+__s_off__ = os.path.join(__images__, 'dect_off.png')
+__s_absent__ = os.path.join(__images__, 'dect_absent.png')
+__t_on__ = os.path.join(__images__, 'comet_on.png')
+__t_absent__ = os.path.join(__images__, 'comet_absent.png')
+__gs_on__ = os.path.join(__images__, 'dect_group_on.png')
+__gs_off__ = os.path.join(__images__, 'dect_group_off.png')
+__gt_on__ = os.path.join(__images__, 'comet_group_on.png')
+__gt_absent__ = os.path.join(__images__, 'comet_group_absent.png')
+__unknown_device__ = os.path.join(__images__, 'unknown.png')
 
 class Device():
 
@@ -65,6 +66,7 @@ class Device():
         self.is_switch = self.functionbitmask & (1 << 9) > 0            # Power Switch
         self.is_repeater = self.functionbitmask & (1 << 10) > 0         # DECT Repeater
 
+        self.type = 'n/a'
         self.state = 'n/a'
         self.b_state = 'n/a'
         self.power = 'n/a'
@@ -216,7 +218,7 @@ class FritzBox():
 
                 actor = Device(device)
 
-                if devtype is not None and devtype != actor.type: continue
+                if (devtype is not None and devtype != actor.type) or actor.actor_id is None: continue
 
                 if actor.is_switch:
                     actor.icon = __s_absent__
@@ -228,6 +230,8 @@ class FritzBox():
                     if actor.present == 1:
                         actor.icon = __gt_on__ if actor.type == 'group' else __t_on__
                         if actor.state == 0: actor.icon = __gt_absent__ if actor.type == 'group' else __t_absent__
+                else:
+                    actor.icon = __unknown_device__
 
                 actors.append(actor)
 
@@ -253,19 +257,19 @@ class FritzBox():
                     xbmcplugin.addDirectoryItem(handle=handle, url='', listitem=wid)
 
                 t.writeLog('<<<<', xbmc.LOGDEBUG)
-                t.writeLog('----- current state of AIN %s -----' % (actor.actor_id), level=xbmc.LOGDEBUG)
-                t.writeLog('Name:          %s' % (actor.name), level=xbmc.LOGDEBUG)
-                t.writeLog('Type:          %s' % (actor.type), level=xbmc.LOGDEBUG)
-                t.writeLog('Presence:      %s' % (actor.present), level=xbmc.LOGDEBUG)
-                t.writeLog('Device ID:     %s' % (actor.device_id), level=xbmc.LOGDEBUG)
-                t.writeLog('Temperature:   %s' % (actor.temperature), level=xbmc.LOGDEBUG)
-                t.writeLog('State:         %s' % (actor.state), level=xbmc.LOGDEBUG)
-                t.writeLog('Icon:          %s' % (actor.icon), level=xbmc.LOGDEBUG)
-                t.writeLog('Power:         %s' % (actor.power), level=xbmc.LOGDEBUG)
-                t.writeLog('Consumption:   %s' % (actor.energy), level=xbmc.LOGDEBUG)
-                t.writeLog('soll Temp.:    %s' % (actor.set_temp), level=xbmc.LOGDEBUG)
-                t.writeLog('comfort Temp.: %s' % (actor.comf_temp), level=xbmc.LOGDEBUG)
-                t.writeLog('lower Temp.:   %s' % (actor.lowering_temp), level=xbmc.LOGDEBUG)
+                t.writeLog('----- current state of AIN %s -----' % (actor.actor_id))
+                t.writeLog('Name:          %s' % (actor.name))
+                t.writeLog('Type:          %s' % (actor.type))
+                t.writeLog('Presence:      %s' % (actor.present))
+                t.writeLog('Device ID:     %s' % (actor.device_id))
+                t.writeLog('Temperature:   %s' % (actor.temperature))
+                t.writeLog('State:         %s' % (actor.state))
+                t.writeLog('Icon:          %s' % (actor.icon))
+                t.writeLog('Power:         %s' % (actor.power))
+                t.writeLog('Consumption:   %s' % (actor.energy))
+                t.writeLog('soll Temp.:    %s' % (actor.set_temp))
+                t.writeLog('comfort Temp.: %s' % (actor.comf_temp))
+                t.writeLog('lower Temp.:   %s' % (actor.lowering_temp))
                 t.writeLog('>>>>', xbmc.LOGDEBUG)
 
             if handle is not None:
@@ -278,10 +282,10 @@ class FritzBox():
 
     def switch(self, cmd, ain=None, param=None, label=None):
 
-        t.writeLog('Provided command: %s' % (cmd), level=xbmc.LOGDEBUG)
-        t.writeLog('Provided ain:     %s' % (ain), level=xbmc.LOGDEBUG)
-        t.writeLog('Provided param:   %s' % (param), level=xbmc.LOGDEBUG)
-        t.writeLog('Provided device:  %s' % (label), level=xbmc.LOGDEBUG)
+        t.writeLog('Provided command: %s' % (cmd))
+        t.writeLog('Provided ain:     %s' % (ain))
+        t.writeLog('Provided param:   %s' % (param))
+        t.writeLog('Provided device:  %s' % (label))
 
         # Call an actor method
 
@@ -313,12 +317,12 @@ class FritzBox():
 
             _sliderBin = int(slider.retValue) * 2
 
-            t.writeLog('Thermostat binary before/now: %s/%s' % (param, _sliderBin), level=xbmc.LOGDEBUG)
+            t.writeLog('Thermostat binary before/now: %s/%s' % (param, _sliderBin))
             del slider
 
             if param == _sliderBin: return
             else:
-                t.writeLog('set thermostat %s to %s' % (ain, _sliderBin), level=xbmc.LOGDEBUG)
+                t.writeLog('set thermostat %s to %s' % (ain, _sliderBin))
                 param = str(_sliderBin)
 
             if param: params['param'] = param
@@ -353,7 +357,7 @@ if len(arguments) > 1:
         _addonHandle = int(arguments[1])
         arguments.pop(0)
         arguments[1] = arguments[1][1:]
-        t.writeLog('Refreshing dynamic list content with plugin handle #%s' % (_addonHandle), level=xbmc.LOGDEBUG)
+        t.writeLog('Refreshing dynamic list content with plugin handle #%s' % (_addonHandle))
 
     params = t.paramsToDict(arguments[1])
     action = urllib.unquote_plus(params.get('action', ''))
@@ -362,7 +366,7 @@ if len(arguments) > 1:
 
     if dev_type not in ['switch', 'thermostat', 'repeater', 'group']: dev_type = None
 
-    t.writeLog('Parameter hash: %s' % (arguments[1:]), level=xbmc.LOGDEBUG)
+    t.writeLog('Parameter hash: %s' % (arguments[1:]))
 
 actors = fritz.get_actors(handle=_addonHandle, devtype=dev_type)
 

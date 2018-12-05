@@ -37,7 +37,7 @@ class SliderWindow(BaseWindow):
 
     def onAction(self, action):
 
-        t.writeLog('Action received: ID %s' % str(action.getId()), level=xbmc.LOGDEBUG)
+        t.writeLog('Action received: ID %s' % str(action.getId()))
         val = None
         if (action == ACTION_PREVIOUS_MENU) or  (action == ACTION_NAV_BACK) or (action == ACTION_SELECT):
             self.close()
@@ -53,7 +53,7 @@ class SliderWindow(BaseWindow):
                 self.updateSliderWindow(val)
 
     def onInit(self):
-        t.writeLog('Init slider window', xbmc.LOGDEBUG)
+        t.writeLog('Init slider window')
         self.getControl(SliderWindow.LABEL_ID).setLabel(self.label)
         self.updateSliderWindow(val=self.initValue)
 
@@ -65,14 +65,14 @@ class SliderWindow(BaseWindow):
 
     def close(self):
         BaseWindow.close(self)
-        t.writeLog('Close slider window', xbmc.LOGDEBUG)
+        t.writeLog('Close slider window')
 
     def updateSliderWindow(self, val=None):
 
         if val is not None:
             self.getControl(SliderWindow.SLIDER_ID).setPercent(val)
             self.curValue = val
-            t.writeLog('set slider value to %s percent' % (val), xbmc.LOGDEBUG)
+            t.writeLog('set slider value to %s percent' % (val))
 
         self.retValue = (self.getControl(SliderWindow.SLIDER_ID).getPercent() * 20.0) / 100 + 8
         self.getControl(SliderWindow.SLIDERVAL_ID).setLabel('{:0.1f}'.format(self.retValue) + ' °C'.decode('utf-8'))

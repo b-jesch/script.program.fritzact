@@ -3,7 +3,7 @@
 
 Das Plugin ist als Widget konzipiert, welches im Home unter dem Punkt Programme abgelegt wird. Damit steht es unmittelbar nach dem Start von Kodi zur Verfügung und die Steckdosen sind mit wenigen Aktionen der Fernbedienung erreichbar.
 
-Dazu muss es allerdings zunächst in den Einstellungen konfiguriert werden. AVM verlangt ab OS > 6.50 eine full qualified Authentication (Nutzer, Passwort). Es empfiehlt sich, für Smart Home einen eigenen Nutzer anzulegen und hier zu verwenden (Sniffing).
+Dazu muss es allerdings zunächst in den Einstellungen konfiguriert werden. AVM verlangt ab OS > 6.50 eine full qualified Authentication (Nutzer, Passwort). Es empfiehlt sich, für Smart Home einen eigenen Nutzer anzulegen und hier zu verwenden.
 
 Zum Einbinden in den Confluence sind einige Änderungen am Skin erforderlich.
 
@@ -85,7 +85,8 @@ Auf eine Anfrage an die FritzBox mit dem Parameter `getdevicelistinfos` antworte
             <offset>0</offset>
         </temperature>
      </device>
-     <device...>...</device>
+     <!-- nächstes Gerät nach dem gleichen Schema -->
+     <device identifier="...">...</device>
 </devicelist>
 ```
     
@@ -144,7 +145,7 @@ Schaltet Aktor aus:
 Aufruf z.B. für den dynamischen List Content:
 
 ```
-<content target="programs">plugin://plugin.program.fritzact?ts=$INFO[Window(Home).Property(fritzact.timestamp)]</content>
+<content target="programs">plugin://script.program.fritzact?ts=$INFO[Window(Home).Property(fritzact.timestamp)]</content>
 ```
 
 Möchte man nur eine bestimmte Gruppe (switch, thermostat, group) anzeigen lassen, kann man dem dynamischen List Content die entsprechende Gruppe über den Parameter 'type' mitgeben. Ein Repeater wird als Switch eingeordnet.
@@ -152,7 +153,7 @@ Möchte man nur eine bestimmte Gruppe (switch, thermostat, group) anzeigen lasse
 (ab Version 0.0.14):
 
 ```
-<content target="programs">plugin://plugin.program.fritzact?ts=$INFO[Window(Home).Property(fritzact.timestamp)]&amp;type=switch</content>
+<content target="programs">plugin://script.program.fritzact?ts=$INFO[Window(Home).Property(fritzact.timestamp)]&amp;type=switch</content>
 ```
 
 Ein Einbinden des Addons in den Skin als Programm-Addon toggelt den bevorzugten Aktor (siehe Settings), d.h. es können bei mehreren Kodi-Instanzen bzw. -installationen auch die zur Installation sinnvollen Aktoren geschaltet werden (z.B Kodi im Wohnzimmer: bevorzugter Aktor ist Aktor im Wohnzimmer, Kodi Kinderzimmer: bevorzugter Aktor ist Aktor im Kinderzimmer usw.). Wird keine bevorzugte AIN im Setup des Addons festgelegt und gibt es mehr als einen Aktor im Smarthome, erscheint eine Liste aller verfügbarer Aktoren, aus denen einer zum Umschalten ausgewählt werden kann.

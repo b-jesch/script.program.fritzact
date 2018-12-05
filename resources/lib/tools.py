@@ -50,7 +50,7 @@ def paramsToDict(parameters):
 
 # write log messages
 
-def writeLog(message, level=xbmc.LOGNOTICE):
+def writeLog(message, level=xbmc.LOGDEBUG):
     xbmc.log('[%s] %s' % (__addonID__, message.encode('utf-8')), level)
 
 # OSD notification (DialogKaiToast)
