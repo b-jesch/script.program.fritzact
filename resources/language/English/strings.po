@@ -53,8 +53,12 @@ msgctxt "#30006"
 msgid "<nothing>"
 msgstr ""
 
+msgctxt "#30007"
+msgid "Show unknown smart devices"
+msgstr ""
+
 #Error Messages
-#empty strings from id 30007 to 30009
+#empty strings from id 30008 to 30009
 
 msgctxt "#30010"
 msgid "Fritz!Box unreachable"

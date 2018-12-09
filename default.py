@@ -75,6 +75,8 @@ class Device():
         self.mode = 'n/a'
         self.lock = 'n/a'
 
+        self.unknown = False
+
         self.set_temp = ['n/a']
         self.comf_temp = ['n/a']
         self.lowering_temp = ['n/a']
@@ -198,6 +200,7 @@ class FritzBox():
         self.__fbtls = 'https://' if __addon__.getSetting('fbTLS').upper() == 'TRUE' else 'http://'
         self.__prefAIN = __addon__.getSetting('preferredAIN')
         self.__readonlyAIN = __addon__.getSetting('readonlyAIN').split(',')
+        self.__unknownAIN = True if __addon__.getSetting('unknownAIN').upper() == 'TRUE' else False
         #
         self.__lastLogin = int(__addon__.getSetting('lastLogin') or 0)
         self.__fbSID = __addon__.getSetting('SID') or None
@@ -231,7 +234,10 @@ class FritzBox():
                         actor.icon = __gt_on__ if actor.type == 'group' else __t_on__
                         if actor.state == 0: actor.icon = __gt_absent__ if actor.type == 'group' else __t_absent__
                 else:
+                    actor.unknown = True
                     actor.icon = __unknown_device__
+
+                if not self.__unknownAIN and  actor.unknown: continue
 
                 actors.append(actor)
 

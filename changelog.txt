@@ -1,3 +1,6 @@
+- 0.0.19
+  option 'show unknown smart devices' added
+
 - 0.0.18
   some adjustments and bug fixes
 

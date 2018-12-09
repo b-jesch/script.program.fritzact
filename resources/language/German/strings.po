@@ -53,6 +53,10 @@ msgctxt "#30006"
 msgid "<nothing>"
 msgstr "<keine>"
 
+msgctxt "#30007"
+msgid "Show unknown smart devices"
+msgstr "Zeige unbekannte Smart Geräte an"
+
 msgctxt "#30010"
 msgid "Fritz!Box unreachable"
 msgstr "Fritz!Box nicht erreichbar"
