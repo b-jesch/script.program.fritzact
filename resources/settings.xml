@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
     <setting id="fbServer" type="text" label="30000" default="fritz.box" />
     <setting id="fbUsername" type="text" label="30001" />

@@ -9,39 +9,30 @@ Smart Home interface:
 https://avm.de/fileadmin/user_upload/Global/Service/Schnittstellen/AHA-HTTP-Interface.pdf
 '''
 
+from resources.lib.tools import *
+
 import hashlib
-import os
 import requests
-import resources.lib.tools as t
 import resources.lib.slider as Slider
 
 import sys
 from time import time
 import urllib
-import xbmc
-import xbmcgui
-import xbmcaddon
+
 import xbmcplugin
 from xml.etree import ElementTree as ET
 import re
 
-__addon__ = xbmcaddon.Addon()
-__addonID__ = __addon__.getAddonInfo('id')
-__addonname__ = __addon__.getAddonInfo('name')
-__version__ = __addon__.getAddonInfo('version')
-__images__ = os.path.join(xbmc.translatePath(__addon__.getAddonInfo('path')), 'resources', 'lib', 'media')
-__LS__ = __addon__.getLocalizedString
-
-__s_on__ = os.path.join(__images__, 'dect_on.png')
-__s_off__ = os.path.join(__images__, 'dect_off.png')
-__s_absent__ = os.path.join(__images__, 'dect_absent.png')
-__t_on__ = os.path.join(__images__, 'comet_on.png')
-__t_absent__ = os.path.join(__images__, 'comet_absent.png')
-__gs_on__ = os.path.join(__images__, 'dect_group_on.png')
-__gs_off__ = os.path.join(__images__, 'dect_group_off.png')
-__gt_on__ = os.path.join(__images__, 'comet_group_on.png')
-__gt_absent__ = os.path.join(__images__, 'comet_group_absent.png')
-__unknown_device__ = os.path.join(__images__, 'unknown.png')
+s_on = os.path.join(addonImages, 'dect_on.png')
+s_off = os.path.join(addonImages, 'dect_off.png')
+s_absent = os.path.join(addonImages, 'dect_absent.png')
+t_on = os.path.join(addonImages, 'comet_on.png')
+t_absent = os.path.join(addonImages, 'comet_absent.png')
+gs_on = os.path.join(addonImages, 'dect_group_on.png')
+gs_off = os.path.join(addonImages, 'dect_group_off.png')
+gt_on = os.path.join(addonImages, 'comet_group_on.png')
+gt_absent = os.path.join(addonImages, 'comet_group_absent.png')
+unknown_device = os.path.join(addonImages, 'unknown.png')
 
 class Device():
 
@@ -147,21 +138,21 @@ class FritzBox():
 
     def __init__(self):
         self.getSettings()
-        self.base_url = self.__fbtls + self.__fbserver
+        self.base_url = '%s%s' % (self.__fbtls, self.__fbserver)
 
         self.session = requests.Session()
 
-        if self.__fbSID is None or (int(time()) - self.__lastLogin > 600):
+        if self.__fbSID is None or (int(time()) - self.__lastLogin > 3600):
 
-            t.writeLog('SID is none/last login more than 10 minutes ago, try to login')
-            sid = None
+            writeLog('SID invalid or session expired, try to login')
+            sid = "0000000000000000"
+            url = '%s%s' % (self.base_url, '/login_sid.lua')
 
             try:
-                response = self.session.get(self.base_url + '/login_sid.lua', verify=False)
+                response = self.session.get(url, verify=False)
                 xml = ET.fromstring(response.text)
                 if xml.find('SID').text == "0000000000000000":
                     challenge = xml.find('Challenge').text
-                    url = self.base_url + '/login_sid.lua'
                     response = self.session.get(url, params={
                         "username": self.__fbuser,
                         "response": self.calculate_response(challenge, self.__fbpasswd),
@@ -169,19 +160,19 @@ class FritzBox():
                     xml = ET.fromstring(response.text)
                     if xml.find('SID').text == "0000000000000000":
                         blocktime = int(xml.find('BlockTime').text)
-                        t.writeLog("Login failed, please wait %s seconds" % (blocktime), xbmc.LOGERROR)
-                        t.notifyOSD(__addonname__, __LS__(30012) % (blocktime))
+                        writeLog("Login failed, please wait %s seconds" % (blocktime), xbmc.LOGERROR)
+                        notifyOSD(addonName, LS(30012) % (blocktime))
                     else:
                         sid = xml.find('SID').text
 
             except (requests.exceptions.ConnectionError, TypeError):
-                t.writeLog('FritzBox unreachable', level=xbmc.LOGERROR)
-                t.notifyOSD(__addonname__, __LS__(30010))
+                writeLog('FritzBox unreachable', level=xbmc.LOGERROR)
+                notifyOSD(addonName, LS(30010))
 
             self.__fbSID = sid
             self.__lastLogin = int(time())
-            __addon__.setSetting('SID', self.__fbSID)
-            __addon__.setSetting('lastLogin', str(self.__lastLogin))
+            addon.setSetting('SID', self.__fbSID)
+            addon.setSetting('lastLogin', str(self.__lastLogin))
 
     @classmethod
 
@@ -194,28 +185,27 @@ class FritzBox():
         return '%s-%s' % (challenge, hashed)
 
     def getSettings(self):
-        self.__fbserver = __addon__.getSetting('fbServer')
-        self.__fbuser = __addon__.getSetting('fbUsername')
-        self.__fbpasswd = t.crypt('fbPasswd', 'fb_key', 'fb_token')
-        self.__fbtls = 'https://' if __addon__.getSetting('fbTLS').upper() == 'TRUE' else 'http://'
-        self.__prefAIN = __addon__.getSetting('preferredAIN')
-        self.__readonlyAIN = __addon__.getSetting('readonlyAIN').split(',')
-        self.__unknownAIN = True if __addon__.getSetting('unknownAIN').upper() == 'TRUE' else False
+        self.__fbserver = addon.getSetting('fbServer')
+        self.__fbuser = addon.getSetting('fbUsername')
+        self.__fbpasswd = crypter('fbPasswd', 'fb_key', 'fb_token')
+        self.__fbtls = 'https://' if addon.getSetting('fbTLS').upper() == 'TRUE' else 'http://'
+        self.__prefAIN = addon.getSetting('preferredAIN')
+        self.__readonlyAIN = addon.getSetting('readonlyAIN').split(',')
+        self.__unknownAIN = True if addon.getSetting('unknownAIN').upper() == 'TRUE' else False
         #
-        self.__lastLogin = int(__addon__.getSetting('lastLogin') or 0)
-        self.__fbSID = __addon__.getSetting('SID') or None
+        self.__lastLogin = int(addon.getSetting('lastLogin') or 0)
+        self.__fbSID = addon.getSetting('SID') or None
 
     def get_actors(self, handle=None, devtype=None):
 
         # Returns a list of Actor objects for querying SmartHome devices.
 
         actors = []
-        devices = None
-
         _devicelist = self.switch('getdevicelistinfos')
+
         if _devicelist is not None:
 
-            devices = ET.fromstring(_devicelist)
+            devices = ET.fromstring(_devicelist.encode('utf-8'))
 
             for device in devices:
 
@@ -224,18 +214,18 @@ class FritzBox():
                 if (devtype is not None and devtype != actor.type) or actor.actor_id is None: continue
 
                 if actor.is_switch:
-                    actor.icon = __s_absent__
+                    actor.icon = s_absent
                     if actor.present == 1:
-                        actor.icon = __gs_on__ if actor.type == 'group' else __s_on__
-                        if actor.state == 0: actor.icon = __gs_off__ if actor.type == 'group' else __s_off__
+                        actor.icon = gs_on if actor.type == 'group' else s_on
+                        if actor.state == 0: actor.icon = gs_off if actor.type == 'group' else s_off
                 elif actor.is_thermostat:
-                    actor.icon = __t_absent__
+                    actor.icon = t_absent
                     if actor.present == 1:
-                        actor.icon = __gt_on__ if actor.type == 'group' else __t_on__
-                        if actor.state == 0: actor.icon = __gt_absent__ if actor.type == 'group' else __t_absent__
+                        actor.icon = gt_on if actor.type == 'group' else t_on
+                        if actor.state == 0: actor.icon = gt_absent if actor.type == 'group' else t_absent
                 else:
                     actor.unknown = True
-                    actor.icon = __unknown_device__
+                    actor.icon = unknown_device
 
                 if not self.__unknownAIN and  actor.unknown: continue
 
@@ -244,10 +234,10 @@ class FritzBox():
                 if handle is not None:
                     wid = xbmcgui.ListItem(label=actor.name, label2=actor.actor_id, iconImage=actor.icon)
                     wid.setProperty('type', actor.type)
-                    wid.setProperty('present', __LS__(30032 + actor.present))
+                    wid.setProperty('present', LS(30032 + actor.present))
                     wid.setProperty('b_present', actor.b_present)
                     if isinstance(actor.state, int):
-                        wid.setProperty('state', __LS__(30030 + actor.state))
+                        wid.setProperty('state', LS(30030 + actor.state))
                     else:
                         wid.setProperty('state', actor.state)
                     wid.setProperty('b_state', actor.b_state)
@@ -262,41 +252,41 @@ class FritzBox():
 
                     xbmcplugin.addDirectoryItem(handle=handle, url='', listitem=wid)
 
-                t.writeLog('<<<<', xbmc.LOGDEBUG)
-                t.writeLog('----- current state of AIN %s -----' % (actor.actor_id))
-                t.writeLog('Name:          %s' % (actor.name))
-                t.writeLog('Type:          %s' % (actor.type))
-                t.writeLog('Presence:      %s' % (actor.present))
-                t.writeLog('Device ID:     %s' % (actor.device_id))
-                t.writeLog('Temperature:   %s' % (actor.temperature))
-                t.writeLog('State:         %s' % (actor.state))
-                t.writeLog('Icon:          %s' % (actor.icon))
-                t.writeLog('Power:         %s' % (actor.power))
-                t.writeLog('Consumption:   %s' % (actor.energy))
-                t.writeLog('soll Temp.:    %s' % (actor.set_temp))
-                t.writeLog('comfort Temp.: %s' % (actor.comf_temp))
-                t.writeLog('lower Temp.:   %s' % (actor.lowering_temp))
-                t.writeLog('>>>>', xbmc.LOGDEBUG)
+                writeLog('<<<<', xbmc.LOGDEBUG)
+                writeLog('----- current state of AIN %s -----' % (actor.actor_id))
+                writeLog('Name:          %s' % (actor.name))
+                writeLog('Type:          %s' % (actor.type))
+                writeLog('Presence:      %s' % (actor.present))
+                writeLog('Device ID:     %s' % (actor.device_id))
+                writeLog('Temperature:   %s' % (actor.temperature))
+                writeLog('State:         %s' % (actor.state))
+                writeLog('Icon:          %s' % (actor.icon))
+                writeLog('Power:         %s' % (actor.power))
+                writeLog('Consumption:   %s' % (actor.energy))
+                writeLog('soll Temp.:    %s' % (actor.set_temp))
+                writeLog('comfort Temp.: %s' % (actor.comf_temp))
+                writeLog('lower Temp.:   %s' % (actor.lowering_temp))
+                writeLog('>>>>', xbmc.LOGDEBUG)
 
             if handle is not None:
                 xbmcplugin.endOfDirectory(handle=handle, updateListing=True)
             xbmc.executebuiltin('Container.Refresh')
 
         else:
-            t.writeLog('no device list available', xbmc.LOGDEBUG)
+            writeLog('no device list available', xbmc.LOGDEBUG)
         return actors
 
     def switch(self, cmd, ain=None, param=None, label=None):
 
-        t.writeLog('Provided command: %s' % (cmd))
-        t.writeLog('Provided ain:     %s' % (ain))
-        t.writeLog('Provided param:   %s' % (param))
-        t.writeLog('Provided device:  %s' % (label))
+        writeLog('Provided command: %s' % (cmd))
+        writeLog('Provided ain:     %s' % (ain))
+        writeLog('Provided param:   %s' % (param))
+        writeLog('Provided device:  %s' % (label))
 
         # Call an actor method
 
         if self.__fbSID is None:
-            t.writeLog('Not logged in or no connection to FritzBox', level=xbmc.LOGERROR)
+            writeLog('Not logged in or no connection to FritzBox', level=xbmc.LOGERROR)
             return
 
         params = {
@@ -309,26 +299,26 @@ class FritzBox():
 
             for li in self.__readonlyAIN:
                 if ain == li.strip():
-                    xbmcgui.Dialog().notification(__addonname__, __LS__(30013), xbmcgui.NOTIFICATION_WARNING, 3000)
+                    xbmcgui.Dialog().notification(addonName, LS(30013), xbmcgui.NOTIFICATION_WARNING, 3000)
                     return
 
             params['ain'] = ain
 
         if cmd == 'sethkrtsoll':
             slider = Slider.SliderWindow.createSliderWindow()
-            slider.label = __LS__(30035) % (label)
+            slider.label = LS(30035) % (label)
             slider.initValue = (param - 16) * 100 / 40
             slider.doModal()
             slider.close()
 
             _sliderBin = int(slider.retValue) * 2
 
-            t.writeLog('Thermostat binary before/now: %s/%s' % (param, _sliderBin))
+            writeLog('Thermostat binary before/now: %s/%s' % (param, _sliderBin))
             del slider
 
             if param == _sliderBin: return
             else:
-                t.writeLog('set thermostat %s to %s' % (ain, _sliderBin))
+                writeLog('set thermostat %s to %s' % (ain, _sliderBin))
                 param = str(_sliderBin)
 
             if param: params['param'] = param
@@ -337,8 +327,8 @@ class FritzBox():
             response = self.session.get(self.base_url + '/webservices/homeautoswitch.lua', params=params, verify=False)
             response.raise_for_status()
         except (requests.exceptions.HTTPError, TypeError):
-            t.writeLog('Bad request, action could not performed', level=xbmc.LOGERROR)
-            xbmcgui.Dialog().notification(__addonname__, __LS__(30014), xbmcgui.NOTIFICATION_ERROR, 3000)
+            writeLog('Bad request, action could not performed', level=xbmc.LOGERROR)
+            xbmcgui.Dialog().notification(addonName, LS(30014), xbmcgui.NOTIFICATION_ERROR, 3000)
             return None
 
         return response.text.strip()
@@ -363,16 +353,16 @@ if len(arguments) > 1:
         _addonHandle = int(arguments[1])
         arguments.pop(0)
         arguments[1] = arguments[1][1:]
-        t.writeLog('Refreshing dynamic list content with plugin handle #%s' % (_addonHandle))
+        writeLog('Refreshing dynamic list content with plugin handle #%s' % (_addonHandle))
 
-    params = t.paramsToDict(arguments[1])
+    params = paramsToDict(arguments[1])
     action = urllib.unquote_plus(params.get('action', ''))
     ain = urllib.unquote_plus(params.get('ain', ''))
     dev_type = urllib.unquote_plus(params.get('type', ''))
 
     if dev_type not in ['switch', 'thermostat', 'repeater', 'group']: dev_type = None
 
-    t.writeLog('Parameter hash: %s' % (arguments[1:]))
+    writeLog('Parameter hash: %s' % (arguments[1:]))
 
 actors = fritz.get_actors(handle=_addonHandle, devtype=dev_type)
 
@@ -401,7 +391,7 @@ if _addonHandle is None:
                 break
 
     elif action == 'setpreferredain':
-        _devlist = [__LS__(30006)]
+        _devlist = [LS(30006)]
         _ainlist = ['']
         for device in actors:
             if device.type == 'switch':
@@ -409,25 +399,25 @@ if _addonHandle is None:
                 _ainlist.append(device.actor_id)
         if len(_devlist) > 0:
             dialog = xbmcgui.Dialog()
-            _idx = dialog.select(__LS__(30020), _devlist)
+            _idx = dialog.select(LS(30020), _devlist)
             if _idx > -1:
-                __addon__.setSetting('preferredAIN', _ainlist[_idx])
+                addon.setSetting('preferredAIN', _ainlist[_idx])
 
     elif action == 'setreadonlyain':
-        _devlist = [__LS__(30006)]
+        _devlist = [LS(30006)]
         _ainlist = ['']
         for device in actors:
             _devlist.append(device.name)
             _ainlist.append(device.actor_id)
         if len(_devlist) > 0:
             dialog = xbmcgui.Dialog()
-            _idx = dialog.multiselect(__LS__(30020), _devlist)
+            _idx = dialog.multiselect(LS(30020), _devlist)
             if _idx is not None:
-                __addon__.setSetting('readonlyAIN', ', '.join([_ainlist[i] for i in _idx]))
+                addon.setSetting('readonlyAIN', ', '.join([_ainlist[i] for i in _idx]))
     else:
         cmd = 'setswitchtoggle'
-        if __addon__.getSetting('preferredAIN') != '':
-            ain =  __addon__.getSetting('preferredAIN')
+        if addon.getSetting('preferredAIN') != '':
+            ain =  addon.getSetting('preferredAIN')
         else:
             if len(actors) == 1 and actors[0].is_switch:
                 ain = actors[0].actor_id
@@ -443,7 +433,7 @@ if _addonHandle is None:
                         _devlist.append('%s: %s' % (device.name, device.temperature))
                     '''
                     if device.is_switch:
-                        L2 = __LS__(30041) if device.b_state == 'false' else __LS__(30040)
+                        L2 = LS(30041) if device.b_state == 'false' else LS(30040)
                     elif device.is_thermostat:
                         L2 = device.temperature
                     liz = xbmcgui.ListItem(label=device.name, label2=L2, iconImage=device.icon)
@@ -453,7 +443,7 @@ if _addonHandle is None:
 
                 if len(_devlist) > 0:
                     dialog = xbmcgui.Dialog()
-                    _idx = dialog.select(__LS__(30020), _devlist, useDetails=True)
+                    _idx = dialog.select(LS(30020), _devlist, useDetails=True)
                     if _idx > -1:
                         device = _ainlist[_idx]
                         ain = device.actor_id
@@ -464,9 +454,9 @@ if _addonHandle is None:
                             param = device.bin_slider
     if cmd is not None:
         fritz.switch(cmd, ain=ain, param=param, label=name)
-        t.writeLog('Last command on device %s was: %s' % (ain, cmd), xbmc.LOGDEBUG)
+        writeLog('Last command on device %s was: %s' % (ain, cmd), xbmc.LOGDEBUG)
         ts = int(time())
         tsp = int(xbmcgui.Window(10000).getProperty('fritzact.timestamp') or '0')
         if ts - tsp > 5:
-            t.writeLog('Set timestamp: %s' % (str(ts)), xbmc.LOGDEBUG)
+            writeLog('Set timestamp: %s' % (str(ts)), xbmc.LOGDEBUG)
             xbmcgui.Window(10000).setProperty('fritzact.timestamp', str(ts))

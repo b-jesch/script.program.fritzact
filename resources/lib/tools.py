@@ -7,22 +7,28 @@ import xbmcaddon
 import os
 import random
 
-__addon__ = xbmcaddon.Addon()
-__addonID__ = __addon__.getAddonInfo('id')
-__path__ = xbmc.translatePath(__addon__.getAddonInfo('path'))
-__IconDefault__ = os.path.join( __path__,'resources', 'lib', 'media', 'default.png')
+addon = xbmcaddon.Addon()
+addonID = addon.getAddonInfo('id')
+addonVersion = addon.getAddonInfo('version')
+addonPath = xbmc.translatePath(addon.getAddonInfo('path'))
+addonName = addon.getAddonInfo('name')
+addonImages = os.path.join(xbmc.translatePath(addonPath), 'resources', 'lib', 'media')
+LS = addon.getLocalizedString
+IconDefault = os.path.join(addonPath, 'resources', 'lib', 'media', 'default.png')
 
 
 # de-/encrypt passwords, simple algorithm, but prevent for sniffers and script kiddies
 
-def crypt( pw, key, token):
-    _pw = __addon__.getSetting(pw)
+def crypter(pw, key, token):
+    _pw = addon.getSetting(pw)
     if _pw == '' or _pw == '*':
-        _key = __addon__.getSetting(key)
-        _token = __addon__.getSetting(token)
+        writeLog('encrypt pass')
+        _key = addon.getSetting(key)
+        _token = addon.getSetting(token)
         if len(_key) > 2: return "".join([chr(ord(_token[i]) ^ ord(_key[i])) for i in range(int(_key[-2:]))])
         return ''
     else:
+        writeLog('decrypt pass')
         _key = ''
         for d in range((len(pw) / 16) + 1):
             _key += ('%016d' % int(random.random() * 10 ** 16))
@@ -30,9 +36,9 @@ def crypt( pw, key, token):
         _tpw = _pw.ljust(len(_key), 'a')
         _token = "".join([chr(ord(_tpw[i]) ^ ord(_key[i])) for i in range(len(_key))])
 
-        __addon__.setSetting(key, _key)
-        __addon__.setSetting(token, _token)
-        __addon__.setSetting(pw, '*')
+        addon.setSetting(key, _key)
+        addon.setSetting(token, _token)
+        addon.setSetting(pw, '*')
 
         return _pw
 
@@ -51,9 +57,9 @@ def paramsToDict(parameters):
 # write log messages
 
 def writeLog(message, level=xbmc.LOGDEBUG):
-    xbmc.log('[%s] %s' % (__addonID__, message.encode('utf-8')), level)
+    xbmc.log('[%s %s] %s' % (addonID, addonVersion, message.encode('utf-8')), level)
 
 # OSD notification (DialogKaiToast)
 
-def notifyOSD(header, message, icon=__IconDefault__, time=5000):
+def notifyOSD(header, message, icon=IconDefault, time=5000):
     xbmcgui.Dialog().notification(header.encode('utf-8'), message.encode('utf-8'), icon, time)
