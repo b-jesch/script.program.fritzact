@@ -22,13 +22,11 @@ IconDefault = os.path.join(addonPath, 'resources', 'lib', 'media', 'default.png'
 def crypter(pw, key, token):
     _pw = addon.getSetting(pw)
     if _pw == '' or _pw == '*':
-        writeLog('encrypt pass')
         _key = addon.getSetting(key)
         _token = addon.getSetting(token)
         if len(_key) > 2: return "".join([chr(ord(_token[i]) ^ ord(_key[i])) for i in range(int(_key[-2:]))])
         return ''
     else:
-        writeLog('decrypt pass')
         _key = ''
         for d in range((len(pw) / 16) + 1):
             _key += ('%016d' % int(random.random() * 10 ** 16))

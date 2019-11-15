@@ -3,7 +3,7 @@
 
 '''
 Documentation for the login procedure
-http://www.avm.de/de/Extern/files/session_id/AVM_Technical_Note_-_Session_ID.pdf
+https://avm.de/fileadmin/user_upload/Global/Service/Schnittstellen/AVM_Technical_Note_-_Session_ID.pdf
 
 Smart Home interface:
 https://avm.de/fileadmin/user_upload/Global/Service/Schnittstellen/AHA-HTTP-Interface.pdf
@@ -33,6 +33,7 @@ gs_off = os.path.join(addonImages, 'dect_group_off.png')
 gt_on = os.path.join(addonImages, 'comet_group_on.png')
 gt_absent = os.path.join(addonImages, 'comet_group_absent.png')
 unknown_device = os.path.join(addonImages, 'unknown.png')
+
 
 class Device():
 
@@ -175,7 +176,6 @@ class FritzBox():
             addon.setSetting('lastLogin', str(self.__lastLogin))
 
     @classmethod
-
     def calculate_response(cls, challenge, password):
 
         # Calculate response for the challenge-response authentication
