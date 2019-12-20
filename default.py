@@ -243,7 +243,7 @@ class FritzBox():
 
         actors = list()
         _devicelist = self.switch('getdevicelistinfos')
- 
+
         if _devicelist is not None:
             print _devicelist.encode('utf-8')
             devices = ET.fromstring(_devicelist.encode('utf-8'))
