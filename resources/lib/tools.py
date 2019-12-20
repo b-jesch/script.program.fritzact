@@ -6,6 +6,7 @@ import xbmcgui
 import xbmcaddon
 import os
 import random
+import urllib
 
 addon = xbmcaddon.Addon()
 addonID = addon.getAddonInfo('id')
@@ -43,7 +44,7 @@ def crypter(pw, key, token):
 # get parameter hash, convert into parameter/value pairs, return dictionary
 
 def paramsToDict(parameters):
-    paramDict = {}
+    paramDict = dict()
     if parameters:
         paramPairs = parameters.split("&")
         for paramsPair in paramPairs:
@@ -55,7 +56,10 @@ def paramsToDict(parameters):
 # write log messages
 
 def writeLog(message, level=xbmc.LOGDEBUG):
-    xbmc.log('[%s %s] %s' % (addonID, addonVersion, message.encode('utf-8')), level)
+    try:
+        xbmc.log('[%s %s] %s' % (addonID, addonVersion, message.encode('utf-8')), level)
+    except UnicodeDecodeError:
+        xbmc.log('[%s %s] %s' % (addonID, addonVersion, message), level)
 
 # OSD notification (DialogKaiToast)
 

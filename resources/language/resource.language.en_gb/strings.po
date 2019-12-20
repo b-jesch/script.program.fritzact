@@ -77,11 +77,19 @@ msgid "This device should not be switched"
 msgstr ""
 
 msgctxt "#30014"
-msgid "Action could not performed"
+msgid "Connection or Network Error"
+msgstr ""
+
+msgctxt "#30015"
+msgid "no Smart Home Devices found"
+msgstr ""
+
+msgctxt "#30016"
+msgid "Login failed! Use a password without any special characters"
 msgstr ""
 
 #Window Labels
-#empty strings from id 30015 to 30019
+#empty strings from id 30016 to 30019
 
 msgctxt "#30020"
 msgid "FritzDECT Switches"

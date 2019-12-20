@@ -3,7 +3,7 @@ The popular german ADSL device 'Fritz!Box' offers via AHA HTTP API, the possibil
 
 All devices can be controlled via a selection list. If only one device is available or if other devices are disabled for switching, this will switched directly. Same on if a preferred device is specified in the setup.
 
-The addon must be configured via the settings menu at first. From OS> 6.50, AVM requires a full qualified authentication (user, password). It is recommended that you create an own user and use it (sniffing) for SmartHome. In addition, the communication can be encrypted via TLS.
+The addon must be configured via the settings menu at first. From OS> 6.50, AVM requires a full qualified authentication (user, password). It is recommended that you create an own user and use it for SmartHome. In addition, the communication can be encrypted via TLS.
 
 <h2> Comments on usage and integration into the Confluence Skin </h2>
 
@@ -15,7 +15,7 @@ Die FritzBox bietet über die AHA-HTTP-API, die Möglichkeit, DECT Steckdosen un
 
 Alle Geräte sind über eine Auswahlliste ansteuerbar. Steht nur ein Gerät zur Verfügung oder sind andere Geräte für das Schalten gesperrt, wird dieses direkt geschalten. Das gleiche gilt, wenn im Setup ein bevorzugtes Gerät angegeben wird.
 
-Als erstes muss das Addon über das Einstellungsmenü konfiguriert werden. AVM verlangt ab OS > 6.50 eine full qualified Authentication (Nutzer, Passwort). Es empfiehlt sich, für Smart Home einen eigenen Nutzer anzulegen und hier zu verwenden (Sniffing). Zusätzlich kann die Kommunikation verschlüsselt über TLS erfolgen.
+Als erstes muss das Addon über das Einstellungsmenü konfiguriert werden. AVM verlangt ab OS > 6.50 eine full qualified Authentication (Nutzer, Passwort). Es empfiehlt sich, für Smart Home einen eigenen Nutzer anzulegen und hier zu verwenden. Zusätzlich kann die Kommunikation verschlüsselt über TLS erfolgen.
 
 <h2>Anmerkungen zur Verwendung und Integration in den Confluence Skin</h2>
 

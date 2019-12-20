@@ -3,7 +3,7 @@
 
 Das Plugin ist als Widget konzipiert, welches im Home unter dem Punkt Programme abgelegt wird. Damit steht es unmittelbar nach dem Start von Kodi zur Verfügung und die Steckdosen sind mit wenigen Aktionen der Fernbedienung erreichbar.
 
-Dazu muss es allerdings zunächst in den Einstellungen konfiguriert werden. AVM verlangt ab OS > 6.50 eine full qualified Authentication (Nutzer, Passwort). Es empfiehlt sich, für Smart Home einen eigenen Nutzer anzulegen und hier zu verwenden.
+Dazu muss es allerdings zunächst in den Einstellungen konfiguriert werden. AVM verlangt ab OS > 5.50 eine komplette Anmeldung (Nutzer, Passwort). Es empfiehlt sich, für Smart Home einen eigenen Nutzer + Passwort anzulegen und hier zu verwenden.
 
 Zum Einbinden in den Confluence sind einige Änderungen am Skin erforderlich.
 
@@ -100,8 +100,6 @@ weitere Informationen (AVM): https://avm.de/fileadmin/user_upload/Global/Service
     ListItem.Property(type)             Aktor-Typ (switch/thermostat/repeater/group)
     ListItem.Property(present)          Gerät offline/online internationalisiert (siehe strings.po)
     ListItem.Property(state)            Schalter an/aus internationalisiert
-    ListItem.Property(b_present)        offline/online als 'boolscher' String (true/false)
-    ListItem.Property(b_state)          an/aus als 'boolscher' String (true/false)
     ListItem.Property(mode)             Betriebsmodus auto/manuell deutsch
     ListItem.Property(temperature)      Temperatur des Sensors in Celsius
     ListItem.Property(power)            entnommene Leistung in 0.01 W

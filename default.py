@@ -17,7 +17,6 @@ import resources.lib.slider as Slider
 
 import sys
 from time import time
-import urllib
 
 import xbmcplugin
 from xml.etree import ElementTree as ET
@@ -39,6 +38,30 @@ class Device():
 
     def __init__(self, device):
 
+        '''
+        Funktionsbitmasken
+
+        Bit 0: HANFUN Gerät
+        Bit 4: Alarm-Sensor
+        Bit 6: Heizkörperregler
+        Bit 7: Energie Messgerät
+        Bit 8: Temperatursensor
+        Bit 9: Schaltsteckdose
+        Bit 10: AVM DECT Repeater
+        Bit 11: Mikrofon
+        Bit 13: HANFUN Unit
+        '''
+
+        isHanFun     = 0b00000000000001
+        isAlert      = 0b00000000010000
+        isThermostat = 0b00000001000000
+        isPowerMeter = 0b00000010000000
+        isTempSensor = 0b00000100000000
+        isPwrSwitch  = 0b00001000000000
+        isRepeater   = 0b00010000000001
+        isMicrophone = 0b00100000000000
+        isHanFunUnit = 0b10000000000000
+
         # Device attributes
 
         self.actor_id = device.attrib['identifier']
@@ -50,17 +73,15 @@ class Device():
 
         self.name = device.find('name').text
         self.present = int(device.find('present').text or '0')
-        self.b_present = 'true' if self.present == 1 else 'false'
 
-        self.is_thermostat = self.functionbitmask & (1 << 6) > 0        # Comet DECT (Radiator Thermostat)
-        self.has_powermeter = self.functionbitmask & (1 << 7) > 0       # Energy Sensor
-        self.has_temperature = self.functionbitmask & (1 << 8) > 0      # Temperature Sensor
-        self.is_switch = self.functionbitmask & (1 << 9) > 0            # Power Switch
-        self.is_repeater = self.functionbitmask & (1 << 10) > 0         # DECT Repeater
+        self.is_thermostat = bool(self.functionbitmask & isThermostat)        # Comet DECT (Radiator Thermostat)
+        self.has_powermeter = bool(self.functionbitmask & isPowerMeter)       # Energy Sensor
+        self.has_temperature = bool(self.functionbitmask & isTempSensor)      # Temperature Sensor
+        self.is_switch = bool(self.functionbitmask & isPwrSwitch)             # Power Switch
+        self.is_repeater = bool(self.functionbitmask & isRepeater)            # DECT Repeater
 
         self.type = 'n/a'
         self.state = 'n/a'
-        self.b_state = 'n/a'
         self.power = 'n/a'
         self.energy = 'n/a'
         self.temperature = 'n/a'
@@ -74,12 +95,13 @@ class Device():
         self.lowering_temp = ['n/a']
         self.bin_slider = 0
 
+        self.icon = unknown_device
+
         # Switch attributes
 
         if self.is_switch:
             self.type = 'switch'
             self.state = int(device.find('switch').find('state').text or '0')
-            self.b_state = 'true' if self.state == 1 else 'false'
             self.mode = device.find('switch').find('mode').text
             self.lock = int(device.find('switch').find('lock').text or '0')
 
@@ -114,15 +136,6 @@ class Device():
         if _group is not None:
             self.type = 'group'
 
-            # ToDo: change back to group ^^
-
-            '''
-            self.type = 'thermostat'
-            self.temperature = '22.0' + ' °C'.decode('utf-8')
-            self.bin_slider = 44
-            self.set_temp = self.bin2degree(self.bin_slider)
-            '''
-
         if self.is_repeater:
             self.type = 'switch'
 
@@ -137,52 +150,82 @@ class Device():
 
 class FritzBox():
 
+    def FbBadRequestException(self, e):
+        writeLog('Bad request or server error: %s' % e)
+        notifyOSD(addonName, LS(30011), xbmcgui.NOTIFICATION_ERROR, time=3000)
+
     def __init__(self):
         self.getSettings()
         self.base_url = '%s%s' % (self.__fbtls, self.__fbserver)
+        self.rights = None
+        self.established = False
 
-        self.session = requests.Session()
+        self.INVALID = '0000000000000000'
+        self.login_url = '/login_sid.lua'
 
-        if self.__fbSID is None or (int(time()) - self.__lastLogin > 3600):
-
-            writeLog('SID invalid or session expired, try to login')
-            sid = "0000000000000000"
-            url = '%s%s' % (self.base_url, '/login_sid.lua')
-
-            try:
-                response = self.session.get(url, verify=False)
-                xml = ET.fromstring(response.text)
-                if xml.find('SID').text == "0000000000000000":
-                    challenge = xml.find('Challenge').text
-                    response = self.session.get(url, params={
-                        "username": self.__fbuser,
-                        "response": self.calculate_response(challenge, self.__fbpasswd),
-                    }, verify=False)
-                    xml = ET.fromstring(response.text)
-                    if xml.find('SID').text == "0000000000000000":
-                        blocktime = int(xml.find('BlockTime').text)
-                        writeLog("Login failed, please wait %s seconds" % (blocktime), xbmc.LOGERROR)
-                        notifyOSD(addonName, LS(30012) % (blocktime))
-                    else:
-                        sid = xml.find('SID').text
-
-            except (requests.exceptions.ConnectionError, TypeError):
-                writeLog('FritzBox unreachable', level=xbmc.LOGERROR)
-                notifyOSD(addonName, LS(30010))
-
+        url = '%s%s' % (self.base_url, self.login_url)
+        self.session = requests.session()
+        try:
+            sid, challenge = self.getFbSID(url, self.__fbSID)
+            if sid == self.INVALID:
+                writeLog('SID invalid or session expired, make challenge')
+                sid, blocktime = self.makeChallenge(url, challenge, self.__fbuser, self.__fbpasswd)
+                if sid == self.INVALID and blocktime > 0:
+                        writeLog("Login blocked, please wait %s seconds" % (blocktime), xbmc.LOGERROR)
+                        notifyOSD(addonName, LS(30012) % blocktime)
+                else:
+                    writeLog('new SID: %s' % sid)
+                    self.established = True
+            elif sid == self.__fbSID:
+                writeLog('Validation Ok')
+                self.established = True
             self.__fbSID = sid
-            self.__lastLogin = int(time())
             addon.setSetting('SID', self.__fbSID)
-            addon.setSetting('lastLogin', str(self.__lastLogin))
 
-    @classmethod
-    def calculate_response(cls, challenge, password):
+        except UnicodeDecodeError:
+            writeLog('UnicodeDecodeError, special chars not allowed in password challenge', level=xbmc.LOGERROR)
+            notifyOSD(addonName, LS(30016), icon=xbmcgui.NOTIFICATION_ERROR)
+            sys.exit()
+        except (requests.exceptions.ConnectionError, TypeError):
+            writeLog('FritzBox unreachable', level=xbmc.LOGERROR)
+            notifyOSD(addonName, LS(30010))
 
-        # Calculate response for the challenge-response authentication
+    def getFbSID(self, url, sid=None, timeout=5):
+        writeLog('Connecting to %s' % url)
+        if sid is None or sid == self.INVALID:
+            response = self.session.get(url, timeout=timeout)
+        else:
+            writeLog('Validate SID %s' % sid)
+            response = self.session.get(url, params={'sid': sid}, timeout=timeout)
 
-        to_hash = (challenge + "-" + password).encode("UTF-16LE")
-        hashed = hashlib.md5(to_hash).hexdigest()
-        return '%s-%s' % (challenge, hashed)
+        if response.status_code != 200: raise self.FbBadRequestException(response.status_code)
+
+        xml = ET.fromstring(response.text)
+        return (xml.find('SID').text, xml.find('Challenge').text)
+
+    def makeChallenge(self, url, challenge, fbuser, fbpasswd, timeout=5):
+        login_challenge = (challenge + '-' + fbpasswd).encode('utf-16le')
+        login_hash = hashlib.md5(login_challenge).hexdigest()
+        response = self.session.get(url, params={'username': fbuser, 'response': challenge + '-' + login_hash}, timeout=timeout)
+
+        if response.status_code != 200: raise self.FbBadRequestException(response.status_code)
+
+        xml = ET.fromstring(response.text)
+        return (xml.find('SID').text, int(xml.find('BlockTime').text))
+
+    def getFbUserRights(self, xml):
+
+        # get user permissions
+        if not self.established: return None
+        rl = list()
+        al = list()
+        rights = xml.find('Rights')
+        names = rights.findall('Name')
+        access = rights.findall('Access')
+        for name in names: rl.append(name.text)
+        for acc in access: al.append(acc.text)
+        writeLog(str(self.rights))
+        return dict(zip(rl, al))
 
     def getSettings(self):
         self.__fbserver = addon.getSetting('fbServer')
@@ -192,88 +235,83 @@ class FritzBox():
         self.__prefAIN = addon.getSetting('preferredAIN')
         self.__readonlyAIN = addon.getSetting('readonlyAIN').split(',')
         self.__unknownAIN = True if addon.getSetting('unknownAIN').upper() == 'TRUE' else False
-        #
-        self.__lastLogin = int(addon.getSetting('lastLogin') or 0)
         self.__fbSID = addon.getSetting('SID') or None
 
     def get_actors(self, handle=None, devtype=None):
 
         # Returns a list of Actor objects for querying SmartHome devices.
 
-        actors = []
+        actors = list()
         _devicelist = self.switch('getdevicelistinfos')
-
+ 
         if _devicelist is not None:
-
+            print _devicelist.encode('utf-8')
             devices = ET.fromstring(_devicelist.encode('utf-8'))
+            if len(devices.getchildren()) > 0:
+                for device in devices:
 
-            for device in devices:
+                    actor = Device(device)
+                    if (devtype is not None and devtype != actor.type) or actor.actor_id is None: continue
 
-                actor = Device(device)
+                    if actor.is_switch:
+                        actor.icon = s_absent
+                        if actor.present == 1:
+                            actor.icon = gs_on if actor.type == 'group' else s_on
+                            if actor.state == 0: actor.icon = gs_off if actor.type == 'group' else s_off
+                    elif actor.is_thermostat:
+                        actor.icon = t_absent
+                        if actor.present == 1:
+                            actor.icon = gt_on if actor.type == 'group' else t_on
+                            if actor.state == 0: actor.icon = gt_absent if actor.type == 'group' else t_absent
+                    else:
+                        actor.unknown = True
+                        actor.icon = unknown_device
 
-                if (devtype is not None and devtype != actor.type) or actor.actor_id is None: continue
+                    if not self.__unknownAIN and  actor.unknown: continue
 
-                if actor.is_switch:
-                    actor.icon = s_absent
-                    if actor.present == 1:
-                        actor.icon = gs_on if actor.type == 'group' else s_on
-                        if actor.state == 0: actor.icon = gs_off if actor.type == 'group' else s_off
-                elif actor.is_thermostat:
-                    actor.icon = t_absent
-                    if actor.present == 1:
-                        actor.icon = gt_on if actor.type == 'group' else t_on
-                        if actor.state == 0: actor.icon = gt_absent if actor.type == 'group' else t_absent
-                else:
-                    actor.unknown = True
-                    actor.icon = unknown_device
+                    actors.append(actor)
 
-                if not self.__unknownAIN and  actor.unknown: continue
+                    if handle is not None:
+                        wid = xbmcgui.ListItem(label=actor.name, label2=actor.actor_id, iconImage=actor.icon)
+                        wid.setProperty('type', actor.type)
+                        wid.setProperty('present', LS(30032 + actor.present))
+                        if isinstance(actor.state, int):
+                            wid.setProperty('state', LS(30030 + actor.state))
+                        else:
+                            wid.setProperty('state', str(actor.state))
+                        wid.setProperty('mode', actor.mode)
+                        wid.setProperty('temperature', unicode(actor.temperature))
+                        wid.setProperty('power', actor.power)
+                        wid.setProperty('energy', actor.energy)
 
-                actors.append(actor)
+                        wid.setProperty('set_temp', unicode(actor.set_temp))
+                        wid.setProperty('comf_temp', unicode(actor.comf_temp))
+                        wid.setProperty('lowering_temp', unicode(actor.lowering_temp))
+
+                        xbmcplugin.addDirectoryItem(handle=handle, url='', listitem=wid)
+
+                    writeLog('<<<<', xbmc.LOGDEBUG)
+                    writeLog('----- current state of AIN %s -----' % (actor.actor_id))
+                    writeLog('Name:          %s' % (actor.name))
+                    writeLog('Type:          %s' % (actor.type))
+                    writeLog('Presence:      %s' % (actor.present))
+                    writeLog('Device ID:     %s' % (actor.device_id))
+                    writeLog('Temperature:   %s' % (actor.temperature))
+                    writeLog('State:         %s' % (actor.state))
+                    writeLog('Icon:          %s' % (actor.icon))
+                    writeLog('Power:         %s' % (actor.power))
+                    writeLog('Consumption:   %s' % (actor.energy))
+                    writeLog('soll Temp.:    %s' % (actor.set_temp))
+                    writeLog('comfort Temp.: %s' % (actor.comf_temp))
+                    writeLog('lower Temp.:   %s' % (actor.lowering_temp))
+                    writeLog('>>>>', xbmc.LOGDEBUG)
 
                 if handle is not None:
-                    wid = xbmcgui.ListItem(label=actor.name, label2=actor.actor_id, iconImage=actor.icon)
-                    wid.setProperty('type', actor.type)
-                    wid.setProperty('present', LS(30032 + actor.present))
-                    wid.setProperty('b_present', actor.b_present)
-                    if isinstance(actor.state, int):
-                        wid.setProperty('state', LS(30030 + actor.state))
-                    else:
-                        wid.setProperty('state', actor.state)
-                    wid.setProperty('b_state', actor.b_state)
-                    wid.setProperty('mode', actor.mode)
-                    wid.setProperty('temperature', unicode(actor.temperature))
-                    wid.setProperty('power', actor.power)
-                    wid.setProperty('energy', actor.energy)
-
-                    wid.setProperty('set_temp', unicode(actor.set_temp))
-                    wid.setProperty('comf_temp', unicode(actor.comf_temp))
-                    wid.setProperty('lowering_temp', unicode(actor.lowering_temp))
-
-                    xbmcplugin.addDirectoryItem(handle=handle, url='', listitem=wid)
-
-                writeLog('<<<<', xbmc.LOGDEBUG)
-                writeLog('----- current state of AIN %s -----' % (actor.actor_id))
-                writeLog('Name:          %s' % (actor.name))
-                writeLog('Type:          %s' % (actor.type))
-                writeLog('Presence:      %s' % (actor.present))
-                writeLog('Device ID:     %s' % (actor.device_id))
-                writeLog('Temperature:   %s' % (actor.temperature))
-                writeLog('State:         %s' % (actor.state))
-                writeLog('Icon:          %s' % (actor.icon))
-                writeLog('Power:         %s' % (actor.power))
-                writeLog('Consumption:   %s' % (actor.energy))
-                writeLog('soll Temp.:    %s' % (actor.set_temp))
-                writeLog('comfort Temp.: %s' % (actor.comf_temp))
-                writeLog('lower Temp.:   %s' % (actor.lowering_temp))
-                writeLog('>>>>', xbmc.LOGDEBUG)
-
-            if handle is not None:
-                xbmcplugin.endOfDirectory(handle=handle, updateListing=True)
-            xbmc.executebuiltin('Container.Refresh')
-
-        else:
-            writeLog('no device list available', xbmc.LOGDEBUG)
+                    xbmcplugin.endOfDirectory(handle=handle, updateListing=True)
+                xbmc.executebuiltin('Container.Refresh')
+            else:
+                writeLog('no device list available', xbmc.LOGDEBUG)
+                notifyOSD(addonName, LS(30015))
         return actors
 
     def switch(self, cmd, ain=None, param=None, label=None):
@@ -299,7 +337,7 @@ class FritzBox():
 
             for li in self.__readonlyAIN:
                 if ain == li.strip():
-                    xbmcgui.Dialog().notification(addonName, LS(30013), xbmcgui.NOTIFICATION_WARNING, 3000)
+                    notifyOSD(addonName, LS(30013), xbmcgui.NOTIFICATION_WARNING, time=3000)
                     return
 
             params['ain'] = ain
@@ -324,11 +362,12 @@ class FritzBox():
             if param: params['param'] = param
 
         try:
-            response = self.session.get(self.base_url + '/webservices/homeautoswitch.lua', params=params, verify=False)
+            response = self.session.get(self.base_url + '/webservices/homeautoswitch.lua', params=params, verify=False, timeout=5)
             response.raise_for_status()
-        except (requests.exceptions.HTTPError, TypeError):
-            writeLog('Bad request, action could not performed', level=xbmc.LOGERROR)
-            xbmcgui.Dialog().notification(addonName, LS(30014), xbmcgui.NOTIFICATION_ERROR, 3000)
+        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError, TypeError), e:
+            writeLog('Bad request or timed out', level=xbmc.LOGERROR)
+            writeLog(str(e), level=xbmc.LOGERROR)
+            notifyOSD(addonName, LS(30014), xbmcgui.NOTIFICATION_ERROR, time=3000)
             return None
 
         return response.text.strip()
@@ -356,12 +395,11 @@ if len(arguments) > 1:
         writeLog('Refreshing dynamic list content with plugin handle #%s' % (_addonHandle))
 
     params = paramsToDict(arguments[1])
-    action = urllib.unquote_plus(params.get('action', ''))
-    ain = urllib.unquote_plus(params.get('ain', ''))
-    dev_type = urllib.unquote_plus(params.get('type', ''))
+    action = urllib.unquote_plus(params.get('action', None))
+    ain = urllib.unquote_plus(params.get('ain', None))
+    dev_type = urllib.unquote_plus(params.get('type', None))
 
     if dev_type not in ['switch', 'thermostat', 'repeater', 'group']: dev_type = None
-
     writeLog('Parameter hash: %s' % (arguments[1:]))
 
 actors = fritz.get_actors(handle=_addonHandle, devtype=dev_type)
@@ -385,35 +423,42 @@ if _addonHandle is None:
         for device in actors:
             if device.actor_id == ain:
                 cmd = 'sethkrtsoll'
-                ain = ain
                 name = device.name
                 param = device.bin_slider
                 break
 
     elif action == 'setpreferredain':
-        _devlist = [LS(30006)]
-        _ainlist = ['']
+        _devlist = list()
+        liz = xbmcgui.ListItem(label=LS(3006))
+        liz.setProperty('ain', '')
+        _devlist.append(liz)
+
         for device in actors:
             if device.type == 'switch':
-                _devlist.append(device.name)
-                _ainlist.append(device.actor_id)
-        if len(_devlist) > 0:
-            dialog = xbmcgui.Dialog()
-            _idx = dialog.select(LS(30020), _devlist)
-            if _idx > -1:
-                addon.setSetting('preferredAIN', _ainlist[_idx])
+                liz = xbmcgui.ListItem(label=device.name, label2=device.actor_id)
+                liz.setProperty('ain', device.actor_id)
+                _devlist.append(liz)
+
+        dialog = xbmcgui.Dialog()
+        _idx = dialog.select(LS(30020), _devlist)
+        if _idx > -1:
+            addon.setSetting('preferredAIN', _devlist[_idx].getProperty('ain'))
 
     elif action == 'setreadonlyain':
-        _devlist = [LS(30006)]
-        _ainlist = ['']
+        _devlist = list()
+        liz = xbmcgui.ListItem(label=LS(30006))
+        liz.setProperty('ain', '')
+        _devlist.append(liz)
+
         for device in actors:
-            _devlist.append(device.name)
-            _ainlist.append(device.actor_id)
-        if len(_devlist) > 0:
-            dialog = xbmcgui.Dialog()
-            _idx = dialog.multiselect(LS(30020), _devlist)
-            if _idx is not None:
-                addon.setSetting('readonlyAIN', ', '.join([_ainlist[i] for i in _idx]))
+            liz = xbmcgui.ListItem(label=device.name, label2=device.actor_id)
+            liz.setProperty('ain', device.actor_id)
+            _devlist.append(liz)
+
+        dialog = xbmcgui.Dialog()
+        _idx = dialog.multiselect(LS(30020), _devlist)
+        if _idx is not None:
+            addon.setSetting('readonlyAIN', ', '.join([_devlist[i].getProperty('ain') for i in _idx]))
     else:
         cmd = 'setswitchtoggle'
         if addon.getSetting('preferredAIN') != '':
@@ -422,36 +467,40 @@ if _addonHandle is None:
             if len(actors) == 1 and actors[0].is_switch:
                 ain = actors[0].actor_id
             else:
-                _devlist = []
-                _ainlist = []
+                _devlist = list()
                 for device in actors:
-                    '''
                     if device.is_switch:
-                        _alternate_state = __LS__(30031) if device.b_state == 'false' else __LS__(30030)
-                        _devlist.append('%s: %s' % (device.name, _alternate_state))
-                    elif device.is_thermostat:
-                        _devlist.append('%s: %s' % (device.name, device.temperature))
-                    '''
-                    if device.is_switch:
-                        L2 = LS(30041) if device.b_state == 'false' else LS(30040)
+                        L2 = LS(30041) if device.state == 0 else LS(30040)
                     elif device.is_thermostat:
                         L2 = device.temperature
+                    else:
+                        writeLog('skip device type with bitmask {0:013b}'.format(device.functionbitmask))
+                        continue
+
                     liz = xbmcgui.ListItem(label=device.name, label2=L2, iconImage=device.icon)
                     liz.setProperty('ain', device.actor_id)
+                    liz.setProperty('name', device.name)
+                    liz.setProperty('type', device.type)
+                    liz.setProperty('slider', str(device.bin_slider))
                     _devlist.append(liz)
-                    _ainlist.append(device)
 
                 if len(_devlist) > 0:
                     dialog = xbmcgui.Dialog()
                     _idx = dialog.select(LS(30020), _devlist, useDetails=True)
                     if _idx > -1:
-                        device = _ainlist[_idx]
-                        ain = device.actor_id
+                        ain = _devlist[_idx].getProperty('ain')
+                        name = _devlist[_idx].getProperty('name')
+                        type = _devlist[_idx].getProperty('type')
+                        slider = int(_devlist[_idx].getProperty('slider'))
 
-                        if device.is_thermostat:
+                        if type == 'thermostat':
                             cmd = 'sethkrtsoll'
-                            name = device.name
-                            param = device.bin_slider
+                            param = slider
+                    else:
+                        cmd = None
+                else:
+                    cmd = None
+
     if cmd is not None:
         fritz.switch(cmd, ain=ain, param=param, label=name)
         writeLog('Last command on device %s was: %s' % (ain, cmd), xbmc.LOGDEBUG)

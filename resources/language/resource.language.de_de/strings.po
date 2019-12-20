@@ -67,15 +67,23 @@ msgstr "Login fehlgeschlagen"
 
 msgctxt "#30012"
 msgid "Login blocked, wait %s seconds"
-msgstr "Login gesperrt, bitte %s sec warten"
+msgstr "Login geblockt, bitte %s sec warten"
 
 msgctxt "#30013"
 msgid "This device should not be switched"
 msgstr "Dieses Gerät darf nicht geschaltet werden"
 
 msgctxt "#30014"
-msgid "Action could not performed"
-msgstr "Aktion kann nicht ausgeführt werden"
+msgid "Connection or Network Error"
+msgstr "Verbindungs- oder Netzwerkfehler"
+
+msgctxt "#30015"
+msgid "no Smart Home Devices found"
+msgstr "keine Smart Home Geräte gefunden"
+
+msgctxt "#30016"
+msgid "Login failed! Use a password without any special characters"
+msgstr "Login fehlgeschlagen. Bitte keine Sonderzeichen im Passwort benutzen"
 
 msgctxt "#30020"
 msgid "FritzDECT Switches"
