@@ -377,9 +377,9 @@ class FritzBox():
 #           M A I N
 # _______________________________
 
-action = None
-ain = None
-dev_type = None
+action = ''
+ain = ''
+dev_type = ''
 
 _addonHandle = None
 
@@ -395,9 +395,9 @@ if len(arguments) > 1:
         writeLog('Refreshing dynamic list content with plugin handle #%s' % (_addonHandle))
 
     params = paramsToDict(arguments[1])
-    action = urllib.unquote_plus(params.get('action', None))
-    ain = urllib.unquote_plus(params.get('ain', None))
-    dev_type = urllib.unquote_plus(params.get('type', None))
+    action = urllib.unquote_plus(params.get('action', action))
+    ain = urllib.unquote_plus(params.get('ain', ain))
+    dev_type = urllib.unquote_plus(params.get('type', type))
 
     if dev_type not in ['switch', 'thermostat', 'repeater', 'group']: dev_type = None
     writeLog('Parameter hash: %s' % (arguments[1:]))
