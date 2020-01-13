@@ -132,7 +132,7 @@ class Device():
         except TypeError:
             pass
 
-        _group = re.match('([A-F]|\d){2}:([A-F]|\d){2}:([A-F]|\d){2}-([A-F]|\d){3}', self.actor_id)
+        _group = re.match('([A-F]|[0-9]){2}:([A-F]|[0-9]){2}:([A-F]|[0-9]){2}-([A-F]|[0-9]){3}', self.actor_id)
         if _group is not None:
             self.type = 'group'
 
@@ -164,7 +164,7 @@ class FritzBox():
         self.login_url = '/login_sid.lua'
 
         url = '%s%s' % (self.base_url, self.login_url)
-        self.session = requests.session()
+        self.session = requests.Session()
         try:
             sid, challenge = self.getFbSID(url, self.__fbSID)
             if sid == self.INVALID:
@@ -193,10 +193,10 @@ class FritzBox():
     def getFbSID(self, url, sid=None, timeout=5):
         writeLog('Connecting to %s' % url)
         if sid is None or sid == self.INVALID:
-            response = self.session.get(url, timeout=timeout)
+            response = self.session.get(url, timeout=timeout, verify=False)
         else:
             writeLog('Validate SID %s' % sid)
-            response = self.session.get(url, params={'sid': sid}, timeout=timeout)
+            response = self.session.get(url, params={'sid': sid}, timeout=timeout, verify=False)
 
         if response.status_code != 200: raise self.FbBadRequestException(response.status_code)
 
@@ -245,9 +245,9 @@ class FritzBox():
         _devicelist = self.switch('getdevicelistinfos')
 
         if _devicelist is not None:
-            print _devicelist.encode('utf-8')
+            # print _devicelist.encode('utf-8')
             devices = ET.fromstring(_devicelist.encode('utf-8'))
-            if len(devices.getchildren()) > 0:
+            if len(list(devices)) > 0:
                 for device in devices:
 
                     actor = Device(device)
@@ -272,7 +272,8 @@ class FritzBox():
                     actors.append(actor)
 
                     if handle is not None:
-                        wid = xbmcgui.ListItem(label=actor.name, label2=actor.actor_id, iconImage=actor.icon)
+                        wid = xbmcgui.ListItem(label=actor.name, label2=actor.actor_id)
+                        wid.setArt({'icon': actor.icon})
                         wid.setProperty('type', actor.type)
                         wid.setProperty('present', LS(30032 + actor.present))
                         if isinstance(actor.state, int):
@@ -379,7 +380,7 @@ class FritzBox():
 
 action = ''
 ain = ''
-dev_type = ''
+dev_type = None
 
 _addonHandle = None
 
@@ -397,7 +398,7 @@ if len(arguments) > 1:
     params = paramsToDict(arguments[1])
     action = urllib.unquote_plus(params.get('action', action))
     ain = urllib.unquote_plus(params.get('ain', ain))
-    dev_type = urllib.unquote_plus(params.get('type', type))
+    dev_type = urllib.unquote_plus(params.get('type', ''))
 
     if dev_type not in ['switch', 'thermostat', 'repeater', 'group']: dev_type = None
     writeLog('Parameter hash: %s' % (arguments[1:]))
