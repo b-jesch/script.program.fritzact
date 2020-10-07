@@ -57,8 +57,15 @@ msgctxt "#30007"
 msgid "Show unknown smart devices"
 msgstr ""
 
+msgctxt "#30008"
+msgid "Settings"
+msgstr ""
+
+msgctxt "#30009"
+msgid "Reset Fritz!Box Session ID (Logout)"
+msgstr ""
+
 #Error Messages
-#empty strings from id 30008 to 30009
 
 msgctxt "#30010"
 msgid "Fritz!Box unreachable"

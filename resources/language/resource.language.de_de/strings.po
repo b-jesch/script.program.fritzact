@@ -57,6 +57,14 @@ msgctxt "#30007"
 msgid "Show unknown smart devices"
 msgstr "Zeige unbekannte Smart Geräte an"
 
+msgctxt "#30008"
+msgid "Settings"
+msgstr "Einstellungen"
+
+msgctxt "#30009"
+msgid "Reset Fritz!Box Session ID (Logout)"
+msgstr "Fritz!Box Session ID zurücksetzen (Abmelden)"
+
 msgctxt "#30010"
 msgid "Fritz!Box unreachable"
 msgstr "Fritz!Box nicht erreichbar"
@@ -83,7 +91,7 @@ msgstr "keine Smart Home Geräte gefunden"
 
 msgctxt "#30016"
 msgid "Login failed! Use a password without any special characters"
-msgstr "Login fehlgeschlagen. Bitte keine Sonderzeichen im Passwort benutzen"
+msgstr "Login fehlgeschlagen. Keine Sonderzeichen im Passwort benutzen"
 
 msgctxt "#30020"
 msgid "FritzDECT Switches"

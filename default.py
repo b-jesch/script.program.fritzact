@@ -150,9 +150,11 @@ class Device():
 
 class FritzBox():
 
-    def FbBadRequestException(self, e):
-        writeLog('Bad request or server error: %s' % e)
-        notifyOSD(addonName, LS(30011), xbmcgui.NOTIFICATION_ERROR, time=3000)
+    class FbInvalidChallengeException(Exception):
+        pass
+
+    class FbBadRequestException(Exception):
+        pass
 
     def __init__(self):
         self.getSettings()
@@ -171,8 +173,7 @@ class FritzBox():
                 writeLog('SID invalid or session expired, make challenge')
                 sid, blocktime = self.makeChallenge(url, challenge, self.__fbuser, self.__fbpasswd)
                 if sid == self.INVALID and blocktime > 0:
-                        writeLog("Login blocked, please wait %s seconds" % (blocktime), xbmc.LOGERROR)
-                        notifyOSD(addonName, LS(30012) % blocktime)
+                    raise self.FbInvalidChallengeException()
                 else:
                     writeLog('new SID: %s' % sid)
                     self.established = True
@@ -181,14 +182,22 @@ class FritzBox():
                 self.established = True
             self.__fbSID = sid
             addon.setSetting('SID', self.__fbSID)
+            return
 
         except UnicodeDecodeError:
             writeLog('UnicodeDecodeError, special chars not allowed in password challenge', level=xbmc.LOGERROR)
             notifyOSD(addonName, LS(30016), icon=xbmcgui.NOTIFICATION_ERROR)
-            sys.exit()
         except (requests.exceptions.ConnectionError, TypeError):
             writeLog('FritzBox unreachable', level=xbmc.LOGERROR)
             notifyOSD(addonName, LS(30010))
+        except self.FbInvalidChallengeException:
+            writeLog("Login blocked for %s seconds" % blocktime, xbmc.LOGERROR)
+            notifyOSD(addonName, LS(30012) % blocktime)
+        exit()
+
+    def resetFbSession(self):
+        writeLog('Reset Session ID')
+        addon.setSetting('SID', self.INVALID)
 
     def getFbSID(self, url, sid=None, timeout=5):
         writeLog('Connecting to %s' % url)
@@ -198,20 +207,28 @@ class FritzBox():
             writeLog('Validate SID %s' % sid)
             response = self.session.get(url, params={'sid': sid}, timeout=timeout, verify=False)
 
-        if response.status_code != 200: raise self.FbBadRequestException(response.status_code)
-
-        xml = ET.fromstring(response.text)
-        return (xml.find('SID').text, xml.find('Challenge').text)
+        try:
+            if response.status_code != 200: raise self.FbBadRequestException
+            xml = ET.fromstring(response.text)
+            return xml.find('SID').text, xml.find('Challenge').text
+        except self.FbBadRequestException:
+            writeLog('Bad request or server error: %s' % response.status_code)
+            notifyOSD(addonName, LS(30011), xbmcgui.NOTIFICATION_ERROR, time=3000)
+        exit()
 
     def makeChallenge(self, url, challenge, fbuser, fbpasswd, timeout=5):
         login_challenge = (challenge + '-' + fbpasswd).encode('utf-16le')
         login_hash = hashlib.md5(login_challenge).hexdigest()
         response = self.session.get(url, params={'username': fbuser, 'response': challenge + '-' + login_hash}, timeout=timeout)
 
-        if response.status_code != 200: raise self.FbBadRequestException(response.status_code)
-
-        xml = ET.fromstring(response.text)
-        return (xml.find('SID').text, int(xml.find('BlockTime').text))
+        try:
+            if response.status_code != 200: raise self.FbBadRequestException()
+            xml = ET.fromstring(response.text)
+            return xml.find('SID').text, int(xml.find('BlockTime').text)
+        except self.FbBadRequestException:
+            writeLog('Bad request or server error: %s' % response.status_code)
+            notifyOSD(addonName, LS(30011), xbmcgui.NOTIFICATION_ERROR, time=3000)
+        exit()
 
     def getFbUserRights(self, xml):
 
@@ -245,7 +262,6 @@ class FritzBox():
         _devicelist = self.switch('getdevicelistinfos')
 
         if _devicelist is not None:
-            # print _devicelist.encode('utf-8')
             devices = ET.fromstring(_devicelist.encode('utf-8'))
             if len(list(devices)) > 0:
                 for device in devices:
@@ -403,7 +419,11 @@ if len(arguments) > 1:
     if dev_type not in ['switch', 'thermostat', 'repeater', 'group']: dev_type = None
     writeLog('Parameter hash: %s' % (arguments[1:]))
 
-actors = fritz.get_actors(handle=_addonHandle, devtype=dev_type)
+if action == 'reset_session':
+    fritz.resetFbSession()
+    exit()
+else:
+    actors = fritz.get_actors(handle=_addonHandle, devtype=dev_type)
 
 if _addonHandle is None:
 
