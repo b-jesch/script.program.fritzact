@@ -99,7 +99,7 @@ msgstr ""
 #empty strings from id 30016 to 30019
 
 msgctxt "#30020"
-msgid "FritzDECT Switches"
+msgid "FritzDECT Devices"
 msgstr ""
 
 msgctxt "#30021"
@@ -164,4 +164,12 @@ msgstr ""
 
 msgctxt "#30041"
 msgid "switch on"
+msgstr ""
+
+msgctxt "#30042"
+msgid " (Battery: %s)"
+msgstr ""
+
+msgctxt "#30043"
+msgid " [COLOR=FFFF0000](Battery: %s)[/COLOR]"
 msgstr ""

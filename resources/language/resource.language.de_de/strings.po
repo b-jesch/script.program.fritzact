@@ -94,8 +94,8 @@ msgid "Login failed! Use a password without any special characters"
 msgstr "Login fehlgeschlagen. Keine Sonderzeichen im Passwort benutzen"
 
 msgctxt "#30020"
-msgid "FritzDECT Switches"
-msgstr "FritzDECT Schalter"
+msgid "FritzDECT Devices"
+msgstr "FritzDECT Geräte"
 
 msgctxt "#30021"
 msgid "Name: "
@@ -160,3 +160,11 @@ msgstr "ausschalten"
 msgctxt "#30041"
 msgid "switch on"
 msgstr "einschalten"
+
+msgctxt "#30042"
+msgid " (Battery: %s)"
+msgstr " (Batterie: %s)"
+
+msgctxt "#30043"
+msgid " [COLOR=FFFF0000](Battery: %s)[/COLOR]"
+msgstr " [COLOR=FFFF0000](Batterie: %s)[/COLOR]"

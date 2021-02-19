@@ -104,6 +104,8 @@ weitere Informationen (AVM): https://avm.de/fileadmin/user_upload/Global/Service
     ListItem.Property(temperature)      Temperatur des Sensors in Celsius
     ListItem.Property(power)            entnommene Leistung in 0.01 W
     ListItem.Property(energy)           Verbrauch seit Inbetriebnahme (Wh)
+    ListItem.Property(battery)          Batteriestatus in %
+    ListItem.Property(batterylow)       Batterie wechseln (0 oder 1)
     
 <h2>Properties der Thermostaten</h2>
 

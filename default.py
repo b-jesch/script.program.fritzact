@@ -20,6 +20,7 @@ from time import time
 
 import xbmcplugin
 from xml.etree import ElementTree as ET
+from xml.dom import minidom
 import re
 
 s_on = os.path.join(addonImages, 'dect_on.png')
@@ -34,7 +35,16 @@ gt_absent = os.path.join(addonImages, 'comet_group_absent.png')
 unknown_device = os.path.join(addonImages, 'unknown.png')
 
 
-class Device():
+def prettify(xml):
+    try:
+        reparse = minidom.parseString(xml)
+        return reparse.toprettyxml(indent='    ')
+    except AttributeError as e:
+        writeLog(e.message, xbmc.LOGERROR)
+        return False
+
+
+class Device:
 
     def __init__(self, device):
 
@@ -87,12 +97,14 @@ class Device():
         self.temperature = 'n/a'
         self.mode = 'n/a'
         self.lock = 'n/a'
+        self.battery = 'n/a' if device.find('battery') is None else device.find('battery').text + '%'
+        self.batterylow = 0 if device.find('batterylow') is None else int(device.find('batterylow').text)
 
         self.unknown = False
 
-        self.set_temp = ['n/a']
-        self.comf_temp = ['n/a']
-        self.lowering_temp = ['n/a']
+        self.set_temp = 'n/a'
+        self.comf_temp = 'n/a'
+        self.lowering_temp = 'n/a'
         self.bin_slider = 0
 
         self.icon = unknown_device
@@ -140,15 +152,14 @@ class Device():
             self.type = 'switch'
 
     @classmethod
-
-    def bin2degree(cls, binary_value = 0):
+    def bin2degree(cls, binary_value=0):
         if 16 <= binary_value <= 56: return '{:0.1f}'.format((binary_value - 16)/2.0 + 8) + ' °C'.decode('utf-8')
         elif binary_value == 253: return ['off']
         elif binary_value == 254: return ['on']
         return ['invalid']
 
 
-class FritzBox():
+class FritzBox:
 
     class FbInvalidChallengeException(Exception):
         pass
@@ -262,6 +273,10 @@ class FritzBox():
         _devicelist = self.switch('getdevicelistinfos')
 
         if _devicelist is not None:
+
+            # Debug all devices, remove from final version
+            # writeLog(prettify(_devicelist))
+
             devices = ET.fromstring(_devicelist.encode('utf-8'))
             if len(list(devices)) > 0:
                 for device in devices:
@@ -304,23 +319,27 @@ class FritzBox():
                         wid.setProperty('set_temp', unicode(actor.set_temp))
                         wid.setProperty('comf_temp', unicode(actor.comf_temp))
                         wid.setProperty('lowering_temp', unicode(actor.lowering_temp))
+                        wid.setProperty('battery', unicode(actor.battery))
+                        wid.setProperty('batterylow', unicode(actor.batterylow))
 
                         xbmcplugin.addDirectoryItem(handle=handle, url='', listitem=wid)
 
                     writeLog('<<<<', xbmc.LOGDEBUG)
                     writeLog('----- current state of AIN %s -----' % (actor.actor_id))
-                    writeLog('Name:          %s' % (actor.name))
-                    writeLog('Type:          %s' % (actor.type))
-                    writeLog('Presence:      %s' % (actor.present))
-                    writeLog('Device ID:     %s' % (actor.device_id))
-                    writeLog('Temperature:   %s' % (actor.temperature))
-                    writeLog('State:         %s' % (actor.state))
-                    writeLog('Icon:          %s' % (actor.icon))
-                    writeLog('Power:         %s' % (actor.power))
-                    writeLog('Consumption:   %s' % (actor.energy))
-                    writeLog('soll Temp.:    %s' % (actor.set_temp))
-                    writeLog('comfort Temp.: %s' % (actor.comf_temp))
-                    writeLog('lower Temp.:   %s' % (actor.lowering_temp))
+                    writeLog('Name:          %s' % actor.name)
+                    writeLog('Type:          %s' % actor.type)
+                    writeLog('Presence:      %s' % actor.present)
+                    writeLog('Device ID:     %s' % actor.device_id)
+                    writeLog('Temperature:   %s' % actor.temperature)
+                    writeLog('State:         %s' % actor.state)
+                    writeLog('Icon:          %s' % actor.icon)
+                    writeLog('Power:         %s' % actor.power)
+                    writeLog('Consumption:   %s' % actor.energy)
+                    writeLog('soll Temp.:    %s' % actor.set_temp)
+                    writeLog('comfort Temp.: %s' % actor.comf_temp)
+                    writeLog('lower Temp.:   %s' % actor.lowering_temp)
+                    writeLog('Battery:       %s' % actor.battery)
+                    writeLog('Battery low:   %s' % actor.batterylow)
                     writeLog('>>>>', xbmc.LOGDEBUG)
 
                 if handle is not None:
@@ -333,10 +352,10 @@ class FritzBox():
 
     def switch(self, cmd, ain=None, param=None, label=None):
 
-        writeLog('Provided command: %s' % (cmd))
-        writeLog('Provided ain:     %s' % (ain))
-        writeLog('Provided param:   %s' % (param))
-        writeLog('Provided device:  %s' % (label))
+        writeLog('Provided command: %s' % cmd)
+        writeLog('Provided ain:     %s' % ain)
+        writeLog('Provided param:   %s' % param)
+        writeLog('Provided device:  %s' % label)
 
         # Call an actor method
 
@@ -361,7 +380,7 @@ class FritzBox():
 
         if cmd == 'sethkrtsoll':
             slider = Slider.SliderWindow.createSliderWindow()
-            slider.label = LS(30035) % (label)
+            slider.label = LS(30035) % label
             slider.initValue = (param - 16) * 100 / 40
             slider.doModal()
             slider.close()
@@ -409,7 +428,7 @@ if len(arguments) > 1:
         _addonHandle = int(arguments[1])
         arguments.pop(0)
         arguments[1] = arguments[1][1:]
-        writeLog('Refreshing dynamic list content with plugin handle #%s' % (_addonHandle))
+        writeLog('Refreshing dynamic list content with plugin handle #%s' % _addonHandle)
 
     params = paramsToDict(arguments[1])
     action = urllib.unquote_plus(params.get('action', action))
@@ -483,7 +502,7 @@ if _addonHandle is None:
     else:
         cmd = 'setswitchtoggle'
         if addon.getSetting('preferredAIN') != '':
-            ain =  addon.getSetting('preferredAIN')
+            ain = addon.getSetting('preferredAIN')
         else:
             if len(actors) == 1 and actors[0].is_switch:
                 ain = actors[0].actor_id
@@ -498,7 +517,12 @@ if _addonHandle is None:
                         writeLog('skip device type with bitmask {0:013b}'.format(device.functionbitmask))
                         continue
 
-                    liz = xbmcgui.ListItem(label=device.name, label2=L2, iconImage=device.icon)
+                    if device.battery != 'n/a':
+                        if device.batterylow == 0: L2 += LS(30042) % device.battery
+                        else: L2 += LS(30043) % device.battery
+
+                    liz = xbmcgui.ListItem(label=device.name, label2=L2)
+                    liz.setArt({'icon': device.icon})
                     liz.setProperty('ain', device.actor_id)
                     liz.setProperty('name', device.name)
                     liz.setProperty('type', device.type)
