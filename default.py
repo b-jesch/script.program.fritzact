@@ -28,6 +28,7 @@ s_off = os.path.join(addonImages, 'dect_off.png')
 s_absent = os.path.join(addonImages, 'dect_absent.png')
 t_on = os.path.join(addonImages, 'comet_on.png')
 t_absent = os.path.join(addonImages, 'comet_absent.png')
+t_lowbatt = os.path.join(addonImages, 'comet_lowbatt.png')
 gs_on = os.path.join(addonImages, 'dect_group_on.png')
 gs_off = os.path.join(addonImages, 'dect_group_off.png')
 gt_on = os.path.join(addonImages, 'comet_group_on.png')
@@ -274,7 +275,7 @@ class FritzBox:
 
         if _devicelist is not None:
 
-            # Debug all devices, remove from final version
+            # Debug all devices, remove or comment next line from final version
             # writeLog(prettify(_devicelist))
 
             devices = ET.fromstring(_devicelist.encode('utf-8'))
@@ -292,13 +293,15 @@ class FritzBox:
                     elif actor.is_thermostat:
                         actor.icon = t_absent
                         if actor.present == 1:
-                            actor.icon = gt_on if actor.type == 'group' else t_on
-                            if actor.state == 0: actor.icon = gt_absent if actor.type == 'group' else t_absent
+                            if actor.type == 'group': actor.icon = gt_on
+                            else:
+                                if actor.batterylow == 1: actor.icon = t_lowbatt
+                                else: actor.icon = t_on
                     else:
                         actor.unknown = True
                         actor.icon = unknown_device
 
-                    if not self.__unknownAIN and  actor.unknown: continue
+                    if not self.__unknownAIN and actor.unknown: continue
 
                     actors.append(actor)
 
