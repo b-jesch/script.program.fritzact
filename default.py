@@ -21,6 +21,7 @@ from time import time
 import xbmcplugin
 from xml.etree import ElementTree as ET
 from xml.dom import minidom
+from urllib.parse import unquote_plus
 import re
 
 s_on = os.path.join(addonImages, 'dect_on.png')
@@ -41,7 +42,7 @@ def prettify(xml):
         reparse = minidom.parseString(xml)
         return reparse.toprettyxml(indent='    ')
     except AttributeError as e:
-        writeLog(e.message, xbmc.LOGERROR)
+        writeLog(e, xbmc.LOGERROR)
         return False
 
 
@@ -141,7 +142,7 @@ class Device:
 
         try:
             if self.has_temperature:
-                self.temperature = '{:0.1f}'.format(float(device.find("temperature").find("celsius").text)/10) + ' °C'.decode('utf-8')
+                self.temperature = '{:0.1f}'.format(float(device.find("temperature").find("celsius").text)/10) + ' °C'
         except TypeError:
             pass
 
@@ -154,7 +155,7 @@ class Device:
 
     @classmethod
     def bin2degree(cls, binary_value=0):
-        if 16 <= binary_value <= 56: return '{:0.1f}'.format((binary_value - 16)/2.0 + 8) + ' °C'.decode('utf-8')
+        if 16 <= binary_value <= 56: return '{:0.1f}'.format((binary_value - 16)/2.0 + 8) + ' °C'
         elif binary_value == 253: return ['off']
         elif binary_value == 254: return ['on']
         return ['invalid']
@@ -176,6 +177,7 @@ class FritzBox:
 
         self.INVALID = '0000000000000000'
         self.login_url = '/login_sid.lua'
+        blocktime = 0
 
         url = '%s%s' % (self.base_url, self.login_url)
         self.session = requests.Session()
@@ -315,15 +317,15 @@ class FritzBox:
                         else:
                             wid.setProperty('state', str(actor.state))
                         wid.setProperty('mode', actor.mode)
-                        wid.setProperty('temperature', unicode(actor.temperature))
+                        wid.setProperty('temperature', actor.temperature)
                         wid.setProperty('power', actor.power)
                         wid.setProperty('energy', actor.energy)
 
-                        wid.setProperty('set_temp', unicode(actor.set_temp))
-                        wid.setProperty('comf_temp', unicode(actor.comf_temp))
-                        wid.setProperty('lowering_temp', unicode(actor.lowering_temp))
-                        wid.setProperty('battery', unicode(actor.battery))
-                        wid.setProperty('batterylow', unicode(actor.batterylow))
+                        wid.setProperty('set_temp', actor.set_temp)
+                        wid.setProperty('comf_temp', actor.comf_temp)
+                        wid.setProperty('lowering_temp', actor.lowering_temp)
+                        wid.setProperty('battery', actor.battery)
+                        wid.setProperty('batterylow', str(actor.batterylow))
 
                         xbmcplugin.addDirectoryItem(handle=handle, url='', listitem=wid)
 
@@ -401,9 +403,10 @@ class FritzBox:
             if param: params['param'] = param
 
         try:
-            response = self.session.get(self.base_url + '/webservices/homeautoswitch.lua', params=params, verify=False, timeout=5)
+            response = self.session.get(self.base_url + '/webservices/homeautoswitch.lua',
+                                        params=params, verify=False, timeout=5)
             response.raise_for_status()
-        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError, TypeError), e:
+        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError, TypeError) as e:
             writeLog('Bad request or timed out', level=xbmc.LOGERROR)
             writeLog(str(e), level=xbmc.LOGERROR)
             notifyOSD(addonName, LS(30014), xbmcgui.NOTIFICATION_ERROR, time=3000)
@@ -419,6 +422,7 @@ class FritzBox:
 action = ''
 ain = ''
 dev_type = None
+actors = list()
 
 _addonHandle = None
 
@@ -434,9 +438,9 @@ if len(arguments) > 1:
         writeLog('Refreshing dynamic list content with plugin handle #%s' % _addonHandle)
 
     params = paramsToDict(arguments[1])
-    action = urllib.unquote_plus(params.get('action', action))
-    ain = urllib.unquote_plus(params.get('ain', ain))
-    dev_type = urllib.unquote_plus(params.get('type', ''))
+    action = unquote_plus(params.get('action', action))
+    ain = unquote_plus(params.get('ain', ain))
+    dev_type = unquote_plus(params.get('type', ''))
 
     if dev_type not in ['switch', 'thermostat', 'repeater', 'group']: dev_type = None
     writeLog('Parameter hash: %s' % (arguments[1:]))

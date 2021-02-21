@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<addon id="script.program.fritzact" name="Fritz Smart Home" version="0.0.27" provider-name="Birger Jesch">
+<addon id="script.program.fritzact" name="Fritz Smart Home" version="3.0.0+matrix" provider-name="Birger Jesch">
     <requires>
-        <import addon="xbmc.python" version="2.24.0" />
-        <import addon="script.module.requests" version="2.9.1" />
+        <import addon="xbmc.python" version="3.0.0" />
+        <import addon="script.module.requests" version="2.22.0" />
     </requires>
 	<extension point="xbmc.python.script" library="default.py">
 		<provides>executable</provides>

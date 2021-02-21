@@ -3,7 +3,6 @@
 # https://raw.githubusercontent.com/robwebset/script.sonos/master/default.py
 
 import os
-import xbmc
 import xbmcgui
 
 import tools as t
@@ -39,7 +38,7 @@ class SliderWindow(BaseWindow):
 
         t.writeLog('Action received: ID %s' % str(action.getId()))
         val = None
-        if (action == ACTION_PREVIOUS_MENU) or  (action == ACTION_NAV_BACK) or (action == ACTION_SELECT):
+        if (action == ACTION_PREVIOUS_MENU) or (action == ACTION_NAV_BACK) or (action == ACTION_SELECT):
             self.close()
         else:
             if action == ACTION_LEFT or ACTION_RIGHT:
@@ -58,7 +57,6 @@ class SliderWindow(BaseWindow):
         self.updateSliderWindow(val=self.initValue)
 
     @classmethod
-
     def onClick(cls, controlID):
         if controlID == SliderWindow.SLIDER_ID:
             pass
@@ -75,5 +73,4 @@ class SliderWindow(BaseWindow):
             t.writeLog('set slider value to %s percent' % (val))
 
         self.retValue = (self.getControl(SliderWindow.SLIDER_ID).getPercent() * 20.0) / 100 + 8
-        self.getControl(SliderWindow.SLIDERVAL_ID).setLabel('{:0.1f}'.format(self.retValue) + ' °C'.decode('utf-8'))
-
+        self.getControl(SliderWindow.SLIDERVAL_ID).setLabel('{:0.1f}'.format(self.retValue) + ' °C')

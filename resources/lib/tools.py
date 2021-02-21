@@ -6,7 +6,6 @@ import xbmcgui
 import xbmcaddon
 import os
 import random
-import urllib
 
 addon = xbmcaddon.Addon()
 addonID = addon.getAddonInfo('id')
@@ -29,7 +28,7 @@ def crypter(pw, key, token):
         return ''
     else:
         _key = ''
-        for d in range((len(pw) / 16) + 1):
+        for d in range((len(pw) // 16) + 1):
             _key += ('%016d' % int(random.random() * 10 ** 16))
         _key = _key[:-2] + ('%02d' % len(_pw))
         _tpw = _pw.ljust(len(_key), 'a')
@@ -43,6 +42,7 @@ def crypter(pw, key, token):
 
 # get parameter hash, convert into parameter/value pairs, return dictionary
 
+
 def paramsToDict(parameters):
     paramDict = dict()
     if parameters:
@@ -55,13 +55,12 @@ def paramsToDict(parameters):
 
 # write log messages
 
+
 def writeLog(message, level=xbmc.LOGDEBUG):
-    try:
-        xbmc.log('[%s %s] %s' % (addonID, addonVersion, message.encode('utf-8')), level)
-    except UnicodeDecodeError:
-        xbmc.log('[%s %s] %s' % (addonID, addonVersion, message), level)
+    xbmc.log('[%s %s] %s' % (addonID, addonVersion, message), level)
 
 # OSD notification (DialogKaiToast)
 
+
 def notifyOSD(header, message, icon=IconDefault, time=5000):
-    xbmcgui.Dialog().notification(header.encode('utf-8'), message.encode('utf-8'), icon, time)
+    xbmcgui.Dialog().notification(header, message, icon, time)
