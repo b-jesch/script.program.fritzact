@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-# https://raw.githubusercontent.com/robwebset/script.sonos/master/default.py
+# https://raw.githubusercontentoolscom/robwebset/scriptoolssonos/master/defaultoolspy
 
 import os
 import xbmcgui
 
-import tools as t
+from . import tools
 
 ACTION_LEFT = 1
 ACTION_RIGHT = 2
@@ -36,7 +36,7 @@ class SliderWindow(BaseWindow):
 
     def onAction(self, action):
 
-        t.writeLog('Action received: ID %s' % str(action.getId()))
+        tools.writeLog('Action received: ID %s' % str(action.getId()))
         val = None
         if (action == ACTION_PREVIOUS_MENU) or (action == ACTION_NAV_BACK) or (action == ACTION_SELECT):
             self.close()
@@ -52,7 +52,7 @@ class SliderWindow(BaseWindow):
                 self.updateSliderWindow(val)
 
     def onInit(self):
-        t.writeLog('Init slider window')
+        tools.writeLog('Init slider window')
         self.getControl(SliderWindow.LABEL_ID).setLabel(self.label)
         self.updateSliderWindow(val=self.initValue)
 
@@ -63,14 +63,14 @@ class SliderWindow(BaseWindow):
 
     def close(self):
         BaseWindow.close(self)
-        t.writeLog('Close slider window')
+        tools.writeLog('Close slider window')
 
     def updateSliderWindow(self, val=None):
 
         if val is not None:
             self.getControl(SliderWindow.SLIDER_ID).setPercent(val)
             self.curValue = val
-            t.writeLog('set slider value to %s percent' % (val))
+            tools.writeLog('set slider value to %s percent' % (val))
 
         self.retValue = (self.getControl(SliderWindow.SLIDER_ID).getPercent() * 20.0) / 100 + 8
         self.getControl(SliderWindow.SLIDERVAL_ID).setLabel('{:0.1f}'.format(self.retValue) + ' °C')
