@@ -93,16 +93,28 @@ msgctxt "#30016"
 msgid "Login failed! Use a password without any special characters"
 msgstr "Login fehlgeschlagen. Keine Sonderzeichen im Passwort benutzen"
 
+msgctxt "#30017"
+msgid "Fritzbox Settings"
+msgstr "Fritzbox Einstellungen"
+
+msgctxt "#30018"
+msgid "Smarthome Devices"
+msgstr "Smarthome Geräte"
+
+msgctxt "#30019"
+msgid "Extras"
+msgstr "Extras"
+
 msgctxt "#30020"
-msgid "FritzDECT Devices"
-msgstr "FritzDECT Geräte"
+msgid "Select preferred Device"
+msgstr "Bevorzugtes Gerät auswählen"
 
 msgctxt "#30021"
 msgid "Name: "
 msgstr "Name: "
 
 msgctxt "#30022"
-msgid "State:"
+msgid "State: "
 msgstr "Status:"
 
 msgctxt "#30023"
@@ -152,6 +164,18 @@ msgstr "nicht schaltbar"
 msgctxt "#30035"
 msgid "%s Value Set:"
 msgstr "%s Sollwert:"
+
+msgctxt "#30036"
+msgid "extended Logging"
+msgstr "erweitertes Logging"
+
+msgctxt "#30037"
+msgid "Select readonly Device(s)"
+msgstr "Geräte mit Readonly-Status auswählen"
+
+msgctxt "#30038"
+msgid "Select Device"
+msgstr "Gerät auswählen"
 
 msgctxt "#30040"
 msgid "switch off"

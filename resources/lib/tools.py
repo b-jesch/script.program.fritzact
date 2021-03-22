@@ -12,7 +12,6 @@ addonID = addon.getAddonInfo('id')
 addonVersion = addon.getAddonInfo('version')
 addonPath = xbmc.translatePath(addon.getAddonInfo('path'))
 addonName = addon.getAddonInfo('name')
-addonImages = os.path.join(xbmc.translatePath(addonPath), 'resources', 'lib', 'media')
 LS = addon.getLocalizedString
 IconDefault = os.path.join(addonPath, 'resources', 'lib', 'media', 'default.png')
 
@@ -39,19 +38,6 @@ def crypter(pw, key, token):
         addon.setSetting(pw, '*')
 
         return _pw
-
-# get parameter hash, convert into parameter/value pairs, return dictionary
-
-
-def paramsToDict(parameters):
-    paramDict = dict()
-    if parameters:
-        paramPairs = parameters.split("&")
-        for paramsPair in paramPairs:
-            paramSplits = paramsPair.split('=')
-            if (len(paramSplits)) == 2:
-                paramDict[paramSplits[0]] = paramSplits[1]
-    return paramDict
 
 # write log messages
 

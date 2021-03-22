@@ -95,11 +95,22 @@ msgctxt "#30016"
 msgid "Login failed! Use a password without any special characters"
 msgstr ""
 
+msgctxt "#30017"
+msgid "Fritzbox Settings"
+msgstr ""
+
+msgctxt "#30018"
+msgid "Smarthome Devices"
+msgstr ""
+
+msgctxt "#30019"
+msgid "Extras"
+msgstr ""
+
 #Window Labels
-#empty strings from id 30016 to 30019
 
 msgctxt "#30020"
-msgid "FritzDECT Devices"
+msgid "Select preferred Device"
 msgstr ""
 
 msgctxt "#30021"
@@ -156,6 +167,18 @@ msgstr ""
 
 msgctxt "#30035"
 msgid "%s Value Set:"
+msgstr ""
+
+msgctxt "#30036"
+msgid "extended Logging"
+msgstr ""
+
+msgctxt "#30037"
+msgid "Select readonly Device(s)"
+msgstr ""
+
+msgctxt "#30038"
+msgid "Select Device"
 msgstr ""
 
 msgctxt "#30040"

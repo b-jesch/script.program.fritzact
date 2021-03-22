@@ -1,5 +1,7 @@
-<h1>Fritz!Box SmartHome - Switching Your FritzDECT</h1>
-<h2>Anmerkungen zur Integration in den Confluence Skin</h2>
+<h1>Informations of this site are outdated!</h1>
+
+<h2>Fritz!Box SmartHome - Switching Your FritzDECT</h2>
+<h3>Anmerkungen zur Integration in den Confluence Skin</h3>
 
 Das Plugin ist als Widget konzipiert, welches im Home unter dem Punkt Programme abgelegt wird. Damit steht es unmittelbar nach dem Start von Kodi zur Verfügung und die Steckdosen sind mit wenigen Aktionen der Fernbedienung erreichbar.
 
@@ -47,7 +49,6 @@ sudo nano IncludesHomeRecentlyAdded.xml
 <include>SmartHome</include>
 ```
    
-   
    Beispiel:
    
 ```
@@ -59,101 +60,3 @@ sudo nano IncludesHomeRecentlyAdded.xml
           <onup>20</onup>
           ...
 ```
-
-
-     
-Auf eine Anfrage an die FritzBox mit dem Parameter `getdevicelistinfos` antwortet diese mit folgendem XML:
- 
-```
-<devicelist version="1">
-    <device identifier="08761 0287125" id="16" 
-        functionbitmask="896" fwversion="03.37" manufacturer="AVM"
-        productname="FRITZ!DECT 200">
-        <present>1</present>
-        <name>Steckdose Wohnzimmer (Lampe)</name>
-        <switch>
-            <state>1</state>
-            <mode>manuell</mode>
-            <lock>0</lock>
-        </switch>
-        <powermeter>
-            <power>0</power>
-            <energy>26</energy>
-        </powermeter>
-        <temperature>
-            <celsius>240</celsius>
-            <offset>0</offset>
-        </temperature>
-     </device>
-     <!-- nächstes Gerät nach dem gleichen Schema -->
-     <device identifier="...">...</device>
-</devicelist>
-```
-    
-weitere Informationen (AVM): https://avm.de/fileadmin/user_upload/Global/Service/Schnittstellen/AHA-HTTP-Interface.pdf
-
-<h2>Properties</h2>
-
-    ListItem.Label                      Name des Aktors
-    ListItem.Label2                     AIN
-    ListItem.Icon                       Zustandsbild des Aktors (offline/an/aus)
-    ListItem.Property(type)             Aktor-Typ (switch/thermostat/repeater/group)
-    ListItem.Property(present)          Gerät offline/online internationalisiert (siehe strings.po)
-    ListItem.Property(state)            Schalter an/aus internationalisiert
-    ListItem.Property(mode)             Betriebsmodus auto/manuell deutsch
-    ListItem.Property(temperature)      Temperatur des Sensors in Celsius
-    ListItem.Property(power)            entnommene Leistung in 0.01 W
-    ListItem.Property(energy)           Verbrauch seit Inbetriebnahme (Wh)
-    ListItem.Property(battery)          Batteriestatus in %
-    ListItem.Property(batterylow)       Batterie wechseln (0 oder 1)
-    
-<h2>Properties der Thermostaten</h2>
-
-    ListItem.Property(set_temp)         Eingestellte Solltemperatur
-    ListItem.Property(comf_temp)        Komforttemperatur (Aufheiztemperatur)
-    ListItem.Property(lowering_temp)    Absenktemperatur
-
-<h2>Methoden/Aufruf</h2>
-
-Toggelt den Aktor:
-
-```
-<onclick>RunScript(plugin.program.fritzact,action=toggle&amp;ain=$INFO[ListItem.Label2])</onclick>
-```
-
-Möchte man einen beliebigen Button innerhalb eines Skins zum Umschalten eines Aktors einbinden, kann man das auch direkt unter der Angabe der AIN (hier z.B. 08150 1234567) des betreffenden Aktors realisieren. Die AIN des Aktors findet man im Webinterface der Fritzbox im Bereich Smarthome:
-
-```
-<control type='button'>
-<label>Garage</label>
-<onclick>RunScript(plugin.program.fritzact,action=toggle&amp;ain='08150 1234567')</onclick>
-</control>
-```
-
-Schaltet Aktor ein:
-
-```
-<onclick>RunScript(plugin.program.fritzact,action=on&amp;ain=$INFO[ListItem.Label2])</onclick>
-```
-
-Schaltet Aktor aus:
-
-```
-<onclick>RunScript(plugin.program.fritzact,action=off&amp;ain=$INFO[ListItem.Label2])</onclick>
-```
-    
-Aufruf z.B. für den dynamischen List Content:
-
-```
-<content target="programs">plugin://script.program.fritzact?ts=$INFO[Window(Home).Property(fritzact.timestamp)]</content>
-```
-
-Möchte man nur eine bestimmte Gruppe (switch, thermostat, group) anzeigen lassen, kann man dem dynamischen List Content die entsprechende Gruppe über den Parameter 'type' mitgeben. Ein Repeater wird als Switch eingeordnet.
-
-(ab Version 0.0.14):
-
-```
-<content target="programs">plugin://script.program.fritzact?ts=$INFO[Window(Home).Property(fritzact.timestamp)]&amp;type=switch</content>
-```
-
-Ein Einbinden des Addons in den Skin als Programm-Addon toggelt den bevorzugten Aktor (siehe Settings), d.h. es können bei mehreren Kodi-Instanzen bzw. -installationen auch die zur Installation sinnvollen Aktoren geschaltet werden (z.B Kodi im Wohnzimmer: bevorzugter Aktor ist Aktor im Wohnzimmer, Kodi Kinderzimmer: bevorzugter Aktor ist Aktor im Kinderzimmer usw.). Wird keine bevorzugte AIN im Setup des Addons festgelegt und gibt es mehr als einen Aktor im Smarthome, erscheint eine Liste aller verfügbarer Aktoren, aus denen einer zum Umschalten ausgewählt werden kann.
