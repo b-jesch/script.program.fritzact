@@ -78,7 +78,7 @@ def build_notificationlabel(device, info=True):
         if info:
             L2 = '{} {}'.format(LS(30023),  LS(30030) if device.state == 0 else LS(30031))
         else:
-            L2 = LS(30041 if device.state == 0 else LS(30040))
+            L2 = LS(30041) if device.state == 0 else LS(30040)
     elif device.is_thermostat:
         L2 = '{} / {}'.format(device.temperature, device.set_temp)
     else:
