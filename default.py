@@ -33,6 +33,7 @@ readonlyAIN = [item.strip() for item in addon.getSetting('readonlyAIN').split(',
 unknownAIN = True if addon.getSetting('unknownAIN').upper() == 'TRUE' else False
 fbsid = addon.getSetting('SID') or None
 enableExtLog = True if addon.getSetting('enableExtendedLogging').upper() == 'TRUE' else False
+widgetAction = int(addon.getSetting('widgetAction'))
 
 
 def prettify(xml):
@@ -123,8 +124,13 @@ def build_widget(params):
             wid.setProperty('battery', actor.battery)
             wid.setProperty('batterylow', str(actor.batterylow))
 
+            action = 'info'
+            if widgetAction == 1:
+                if actor.type == 'thermostat': action = 'temp'
+                else: action = 'toggle'
+
             wid.setProperty('IsPlayable', 'false')
-            url = get_url(params.get('url', ''), action='info', ain=actor.ain)
+            url = get_url(params.get('url', ''), action=action, ain=actor.ain)
             xbmcplugin.addDirectoryItem(handle=params['handle'], url=url, listitem=wid)
 
             if enableExtLog:

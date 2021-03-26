@@ -192,3 +192,15 @@ msgstr " (Batterie: %s)"
 msgctxt "#30043"
 msgid " [COLOR=FFFF0000](Battery: %s)[/COLOR]"
 msgstr " [COLOR=FFFF0000](Batterie: %s)[/COLOR]"
+
+msgctxt "#30050"
+msgid "Select Action on Widget"
+msgstr "Aktion bei Auswahl im Widget"
+
+msgctxt "#30051"
+msgid "show Info"
+msgstr "Informationen anzeigen"
+
+msgctxt "#30052"
+msgid "switch Actuator"
+msgstr "Aktor schalten"
