@@ -101,10 +101,10 @@ def build_notificationlabel(device, info=True):
     return L2
 
 
-def show_info(ain):
+def show_info(params):
     actors = fritz.get_actors()
     # device = next((item for item in actors if item.ain == params['ain']), None)
-    device = next((item for item in actors if item.ain == ain), None)
+    device = next((item for item in actors if item.ain == params['ain']), None)
     L2 = build_notificationlabel(device, info=True)
     if L2 is None: L2 = 'unkown'
     notifyOSD(device.name, L2, icon=device.icon)
@@ -344,7 +344,7 @@ class FritzBox:
                 fbParams.update({'param': str(_sliderBin)})
 
         if self.sendCommand(fbParams) is not None and showResult:
-            show_info(params['ain'])
+            show_info(params)
 
 # _______________________________
 #
