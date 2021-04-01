@@ -208,3 +208,7 @@ msgstr ""
 msgctxt "#30052"
 msgid "switch Actuator"
 msgstr ""
+
+msgctxt "#30053"
+msgid "Show state after switching"
+msgstr ""

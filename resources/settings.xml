@@ -13,6 +13,7 @@
         <setting type="lsep" label="30019" />
         <setting id="fbResetSession" type="action" option="close" label="30009" action="RunScript(script.program.fritzact,action=reset_session)" default="" />
         <setting id="widgetAction" type="enum" label="30050" lvalues="30051|30052" default="0" />
+        <setting id="showResult" type="bool" label="30053" default="true" enable="eq(-1,1)" />
         <setting id="enableExtendedLogging" type="bool" label="30036" default="false" />
     </category>
 </settings>

@@ -1,13 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-'''
+"""
 Documentation for the login procedure
 https://avm.de/fileadmin/user_upload/Global/Service/Schnittstellen/AVM_Technical_Note_-_Session_ID.pdf
 
 Smart Home interface:
 https://avm.de/fileadmin/user_upload/Global/Service/Schnittstellen/AHA-HTTP-Interface.pdf
-'''
+"""
 
 from resources.lib.tools import *
 
@@ -22,7 +22,7 @@ from time import time
 import xbmcplugin
 from xml.etree import ElementTree
 from xml.dom import minidom
-from urllib.parse import unquote_plus, urlencode, parse_qsl
+from urllib.parse import urlencode, parse_qsl
 
 fbserver = addon.getSetting('fbServer')
 fbuser = addon.getSetting('fbUsername')
@@ -34,6 +34,10 @@ unknownAIN = True if addon.getSetting('unknownAIN').upper() == 'TRUE' else False
 fbsid = addon.getSetting('SID') or None
 enableExtLog = True if addon.getSetting('enableExtendedLogging').upper() == 'TRUE' else False
 widgetAction = int(addon.getSetting('widgetAction'))
+showResult = True if addon.getSetting('showResult').upper() == 'TRUE' else False
+
+if xbmcgui.Window(10000).getProperty('fritzact.timestamp') == '':
+    xbmcgui.Window(10000).setProperty('fritzact.timestamp', str(round(int(time()), -1)))
 
 
 def prettify(xml):
@@ -55,8 +59,11 @@ def get_url(url, **kwargs):
 def build_devlist(params):
     _devlist = list()
     liz = xbmcgui.ListItem(label=LS(30006))
+
     liz.setProperty('ain', '')
     _devlist.append(liz)
+
+    actors = fritz.get_actors(params)
 
     for device in actors:
         if device.type == 'switch':
@@ -94,8 +101,10 @@ def build_notificationlabel(device, info=True):
     return L2
 
 
-def show_info(params):
-    device = next((item for item in actors if item.ain == params['ain']), None)
+def show_info(ain):
+    actors = fritz.get_actors()
+    # device = next((item for item in actors if item.ain == params['ain']), None)
+    device = next((item for item in actors if item.ain == ain), None)
     L2 = build_notificationlabel(device, info=True)
     if L2 is None: L2 = 'unkown'
     notifyOSD(device.name, L2, icon=device.icon)
@@ -103,7 +112,10 @@ def show_info(params):
 
 def build_widget(params):
     if params.get('handle', None) is not None:
+
+        actors = fritz.get_actors(params)
         writeLog('build/refresh widget with handle #%s' % params['handle'])
+
         for actor in actors:
             wid = xbmcgui.ListItem(label='%s' % actor.name,
                                    label2=actor.ain)
@@ -281,7 +293,9 @@ class FritzBox:
         _devicelist = self.sendCommand(fbParams)
         if _devicelist is not None:
 
-            if enableExtLog: writeLog(prettify(_devicelist))
+            if enableExtLog:
+                writeLog('List/parameters of all known devices')
+                writeLog(prettify(_devicelist))
 
             devices = ElementTree.fromstring(_devicelist.encode('utf-8'))
             if len(list(devices)) > 0:
@@ -309,6 +323,8 @@ class FritzBox:
             notifyOSD(addonName, LS(30013), xbmcgui.NOTIFICATION_WARNING, time=3000)
             return
 
+        actors = fritz.get_actors(params)
+
         if params['action'] == 'temp':
             if params.get('param', None) is None:
                 actor = next((item for item in actors if item.ain == params['ain']), None)
@@ -327,7 +343,8 @@ class FritzBox:
             else:
                 fbParams.update({'param': str(_sliderBin)})
 
-        return self.sendCommand(fbParams)
+        if self.sendCommand(fbParams) is not None and showResult:
+            show_info(params['ain'])
 
 # _______________________________
 #
@@ -348,8 +365,6 @@ if len(args) > 1:
 
     params.update(dict(parse_qsl(args[1])))
     writeLog('Parameters: %s' % params)
-
-    actors = fritz.get_actors(params)
 
     actionDict = dict(
         {'reset_session': fritz.resetFbSession,
