@@ -103,11 +103,21 @@ def build_notificationlabel(device, info=True):
 
 def show_info(params):
     actors = fritz.get_actors()
-    # device = next((item for item in actors if item.ain == params['ain']), None)
     device = next((item for item in actors if item.ain == params['ain']), None)
     L2 = build_notificationlabel(device, info=True)
     if L2 is None: L2 = 'unkown'
     notifyOSD(device.name, L2, icon=device.icon)
+
+
+def widget(params):
+    if widgetAction == 0:
+        show_info(params)
+    elif widgetAction == 1:
+        if params['type'] == 'thermostat': params['action'] = 'temp'
+        else: params['action'] = 'toggle'
+        fritz.exec(params)
+    else:
+        writeLog('unknown action parameter', xbmc.LOGERROR)
 
 
 def build_widget(params):
@@ -136,13 +146,8 @@ def build_widget(params):
             wid.setProperty('battery', actor.battery)
             wid.setProperty('batterylow', str(actor.batterylow))
 
-            action = 'info'
-            if widgetAction == 1:
-                if actor.type == 'thermostat': action = 'temp'
-                else: action = 'toggle'
-
             wid.setProperty('IsPlayable', 'false')
-            url = get_url(params.get('url', ''), action=action, ain=actor.ain)
+            url = get_url(params.get('url', ''), action='widget', type=actor.type, ain=actor.ain)
             xbmcplugin.addDirectoryItem(handle=params['handle'], url=url, listitem=wid)
 
             if enableExtLog:
@@ -368,6 +373,7 @@ if len(args) > 1:
 
     actionDict = dict(
         {'reset_session': fritz.resetFbSession,
+         'widget': widget,
          'info': show_info,
          'toggle': fritz.exec,
          'on': fritz.exec,
