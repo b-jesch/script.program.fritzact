@@ -208,3 +208,7 @@ msgstr "Aktor schalten"
 msgctxt "#30053"
 msgid "Show state after switching"
 msgstr "Status nach dem Schalten anzeigen"
+
+msgctxt "#30060"
+msgid "Password seems to be encrypted, but there is no Key and Token for decryption. Go into Addon Settings and set your Password again."
+msgstr "Das Passwort ist verschlüsselt, jedoch fehlen zum Entschlüsseln Key und Token. Passwort erneut in den Addon Einstellungen eingeben."

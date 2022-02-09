@@ -212,3 +212,8 @@ msgstr ""
 msgctxt "#30053"
 msgid "Show state after switching"
 msgstr ""
+
+msgctxt "#30060"
+msgid "Password seems to be encrypted, but there is no Key and Token for decryption. Go into Addon Settings and set your Password again."
+msgstr ""
+

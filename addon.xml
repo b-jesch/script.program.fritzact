@@ -19,6 +19,7 @@
         <email>birger.jesch@gmail.com</email>
         <website></website>
         <news>
+3.1.4+matrix:   Bugfix: Device don't switch if this is the only actuator within Fritz!Smart
 3.1.3+matrix:   Improved data flow on widget action
 3.1.2+matrix:   Additional option for notification of actuator status after switching added.
 3.1.1+matrix:   Selection between actuator switching or actuator info in the widget implemented.

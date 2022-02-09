@@ -23,6 +23,9 @@ def crypter(pw, key, token):
     if _pw == '' or _pw == '*':
         _key = addon.getSetting(key)
         _token = addon.getSetting(token)
+        if _key == '' or _token == '':
+            xbmcgui.Dialog().ok(addonName, LS(30060))
+            return ''
         if len(_key) > 2: return "".join([chr(ord(_token[i]) ^ ord(_key[i])) for i in range(int(_key[-2:]))])
         return ''
     else:

@@ -390,9 +390,9 @@ else:
 
     actors = fritz.get_actors()
     if addon.getSetting('preferredAIN') != '':
-        ain = addon.getSetting('preferredAIN')
+        params = dict({'ain': addon.getSetting('preferredAIN'), 'action': 'toggle'})
     elif len(actors) == 1 and actors[0].is_switch:
-        ain = actors[0].ain
+        params = dict({'ain': actors[0].ain, 'action': 'toggle'})
     else:
         _devlist = list()
         for device in actors:
@@ -424,4 +424,5 @@ else:
                 )
                 if _devlist[_idx].getProperty('type') == 'thermostat':
                     params.update({'param': int(_devlist[_idx].getProperty('slider'))})
-                fritz.exec(params)
+
+    fritz.exec(params)
