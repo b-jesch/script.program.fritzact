@@ -16,8 +16,7 @@ available immediately after the start of Kodi and the actuators can be reached w
 However, the integration as a widget requires an integration into the skin. The necessary changes to the skin are described 
 in detail in the [Readme.md] (resources/Confluence/Readme.md) folder in the resources/Confluence folder.
 
-For newer skins an integration is possible as a "dynamic list control" widget. To do this, simply implement ```plugin://script.program.fritzact``` 
-in your skin setup. Skins must use the "Skinhelper Widget" to do this.
+For newer skins an integration is possible as a "dynamic list control" widget. To do this, simply implement ```plugin://script.program.fritzact?ts=$INFO[Window(Home).Property(fritzact.timestamp)]``` in your skin setup. Skins must use the "Skinhelper Widget" to do this.
 
 
 <h2>Extended debugging</h2>
