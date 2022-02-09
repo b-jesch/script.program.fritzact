@@ -389,10 +389,11 @@ if len(args) > 1:
 else:
 
     actors = fritz.get_actors()
+    params = dict()
     if addon.getSetting('preferredAIN') != '':
-        params = dict({'ain': addon.getSetting('preferredAIN'), 'action': 'toggle'})
+        params.update({'ain': addon.getSetting('preferredAIN'), 'action': 'toggle'})
     elif len(actors) == 1 and actors[0].is_switch:
-        params = dict({'ain': actors[0].ain, 'action': 'toggle'})
+        params.update({'ain': actors[0].ain, 'action': 'toggle'})
     else:
         _devlist = list()
         for device in actors:
@@ -415,7 +416,7 @@ else:
             dialog = xbmcgui.Dialog()
             _idx = dialog.select(LS(30038), _devlist, useDetails=True)
             if _idx > -1:
-                params = dict(
+                params.update(
                     {'action': _devlist[_idx].getProperty('action'),
                      'ain': _devlist[_idx].getProperty('ain'),
                      'label': _devlist[_idx].getProperty('name'),
@@ -424,5 +425,6 @@ else:
                 )
                 if _devlist[_idx].getProperty('type') == 'thermostat':
                     params.update({'param': int(_devlist[_idx].getProperty('slider'))})
-
+            else:
+                exit(0)
     fritz.exec(params)
