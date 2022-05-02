@@ -186,12 +186,12 @@ msgid "switch on"
 msgstr "einschalten"
 
 msgctxt "#30042"
-msgid " (Battery: %s)"
-msgstr " (Batterie: %s)"
+msgid " - Battery: %s"
+msgstr " - Batterie: %s"
 
 msgctxt "#30043"
-msgid " [COLOR=FFFF0000](Battery: %s)[/COLOR]"
-msgstr " [COLOR=FFFF0000](Batterie: %s)[/COLOR]"
+msgid " - [COLOR=FFFF0000]Battery: %s[/COLOR]"
+msgstr " - [COLOR=FFFF0000]Batterie: %s[/COLOR]"
 
 msgctxt "#30050"
 msgid "Select Action on Widget"

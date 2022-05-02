@@ -4,13 +4,14 @@
 import xbmc
 import xbmcgui
 import xbmcaddon
+import xbmcvfs
 import os
 import random
 
 addon = xbmcaddon.Addon()
 addonID = addon.getAddonInfo('id')
 addonVersion = addon.getAddonInfo('version')
-addonPath = xbmc.translatePath(addon.getAddonInfo('path'))
+addonPath = xbmcvfs.translatePath(addon.getAddonInfo('path'))
 addonName = addon.getAddonInfo('name')
 LS = addon.getLocalizedString
 IconDefault = os.path.join(addonPath, 'resources', 'lib', 'media', 'default.png')

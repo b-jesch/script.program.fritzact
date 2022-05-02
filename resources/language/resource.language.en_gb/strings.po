@@ -190,11 +190,11 @@ msgid "switch on"
 msgstr ""
 
 msgctxt "#30042"
-msgid " (Battery: %s)"
+msgid " - Battery: %s"
 msgstr ""
 
 msgctxt "#30043"
-msgid " [COLOR=FFFF0000](Battery: %s)[/COLOR]"
+msgid " - [COLOR=FFFF0000]Battery: %s[/COLOR]"
 msgstr ""
 
 msgctxt "#30050"

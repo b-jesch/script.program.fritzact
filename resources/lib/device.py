@@ -1,11 +1,12 @@
-import xbmc
 import xbmcaddon
+import xbmcvfs
 import os
 import re
 
 addon = xbmcaddon.Addon()
-addonPath = xbmc.translatePath(addon.getAddonInfo('path'))
-addonImages = os.path.join(xbmc.translatePath(addonPath), 'resources', 'lib', 'media')
+addonPath = xbmcvfs.translatePath(addon.getAddonInfo('path'))
+addonImages = os.path.join(addonPath, 'resources', 'lib', 'media')
+LS = addon.getLocalizedString
 
 s_on = os.path.join(addonImages, 'dect_on.png')
 s_off = os.path.join(addonImages, 'dect_off.png')
@@ -152,6 +153,6 @@ class Device:
     def bin2degree(cls, binary_value=0):
         if 16 <= binary_value <= 56:
             return '{:0.1f}'.format((binary_value - 16) / 2.0 + 8) + ' °C'
-        elif binary_value == 253: return '[off]'
+        elif binary_value == 253: return '[%s]' % LS(30030)
         elif binary_value == 254: return '[max]'
         return 'n/a'
