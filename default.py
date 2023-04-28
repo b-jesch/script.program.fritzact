@@ -341,7 +341,7 @@ class FritzBox:
             slider.doModal()
             slider.close()
 
-            _sliderBin = int(slider.retValue) * 2
+            _sliderBin = float(slider.retValue) * 2
             del slider
 
             if params['param'] == _sliderBin: return

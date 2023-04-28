@@ -72,5 +72,5 @@ class SliderWindow(BaseWindow):
             self.curValue = val
             tools.writeLog('set slider value to %s percent' % (val))
 
-        self.retValue = (self.getControl(SliderWindow.SLIDER_ID).getPercent() * 20.0) / 100 + 8
+        self.retValue = (self.getControl(SliderWindow.SLIDER_ID).getPercent()) * 20 / 100.0 + 8
         self.getControl(SliderWindow.SLIDERVAL_ID).setLabel('{:0.1f}'.format(self.retValue) + ' °C')
